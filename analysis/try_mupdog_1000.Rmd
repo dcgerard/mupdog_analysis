@@ -1,0 +1,105 @@
+---
+title: "Try mupdog on top 1000 SNPs"
+author: "David Gerard"
+date: "December 20, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I try out an inefficient version of mupdog for the first time.
+
+# Analysis
+
+```{r}
+library(tidyverse)
+library(mupdog)
+refmat <- as.matrix(read.csv("/home/david/Code/reproduce_genotyping/Output/shirasawa_snps/example_refcounts.csv", row.names = 1))
+sizemat <- as.matrix(read.csv("/home/david/Code/reproduce_genotyping/Output/shirasawa_snps/example_readcounts.csv", row.names = 1))
+```
+
+Subset since I think this will be slow
+
+```{r}
+nind <- nrow(refmat)
+nsnps <- ncol(refmat)
+```
+
+Try it out!
+```{r, cache = TRUE}
+mout <- mupdog::mupdog(refmat = refmat, sizemat = sizemat, ploidy = 6, verbose = FALSE, 
+                       control = list(obj_tol = 10^-5), num_clust = 7)
+```
+
+# Look at genotyping
+
+The correlation matrix looks a little different than what I expected --- I expected all of the correlations to be about the same.
+```{r}
+hist(mout$cor_mat[upper.tri(mout$cor_mat)])
+```
+
+```{r}
+hist(mout$seq)
+```
+
+```{r}
+hist(log(mout$bias))
+```
+
+```{r}
+hist(mout$od)
+```
+
+Inbreeding doesn't seem to be too important for these data
+```{r}
+hist(log(mout$inbreeding))
+```
+
+```{r}
+## qwraps2::lazyload_cache_dir(path = "./try_mupdog_1000_cache/html/")
+library(corrplot)
+cororder <- corrMatOrder(mout$cor_mat, order = "hclust")
+cormat <- mout$cor_mat[cororder, cororder]
+corrplot(mout$cor_mat, method = "color", diag = FALSE, order = "hclust", tl.pos = "n")
+```
+
+
+The Genotypes all look fantastic.
+```{r, cache=TRUE}
+for (index in 1:10) {
+  pl <- plot(mout, index)
+  print(pl)
+}
+
+for (index in 991:1000) {
+  pl <- plot(mout, index)
+  print(pl)
+}
+```
+
+
+
+
+
+```{r}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

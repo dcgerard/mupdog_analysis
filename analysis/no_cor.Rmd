@@ -1,0 +1,58 @@
+---
+title: "mupdog no cor"
+author: "David Gerard"
+date: "December 20, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I see if not updatign the correlation matrix makes the inbreeding coefficients non-zero.
+
+# Fit mupdog
+
+```{r}
+library(tidyverse)
+library(mupdog)
+refmat <- as.matrix(read.csv("/home/david/Code/reproduce_genotyping/Output/shirasawa_snps/example_refcounts.csv", row.names = 1))
+sizemat <- as.matrix(read.csv("/home/david/Code/reproduce_genotyping/Output/shirasawa_snps/example_readcounts.csv", row.names = 1))
+nind <- nrow(refmat)
+nsnps <- ncol(refmat)
+```
+
+Try it out!
+```{r, cache = TRUE}
+mout <- mupdog::mupdog(refmat = refmat, sizemat = sizemat, ploidy = 6, verbose = FALSE, 
+                       control = list(obj_tol = 10^-5), num_clust = 7, update_cor = FALSE)
+```
+
+# Look at Results
+
+Correlations should all be 0.
+```{r}
+hist(mout$cor_mat[upper.tri(mout$cor_mat)])
+```
+
+Still don't see inbreeding estimated greater than 0.
+```{r}
+hist(log(mout$inbreeding))
+```
+
+
+In high-bias SNP's, the genotyping seems to be a little bit off.
+
+```{r, cache=TRUE}
+for (index in 1:10) {
+  pl <- plot(mout, index)
+  print(pl)
+}
+
+for (index in 991:1000) {
+  pl <- plot(mout, index)
+  print(pl)
+}
+```

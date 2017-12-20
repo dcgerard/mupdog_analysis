@@ -1,0 +1,54 @@
+---
+title: "Compare With correlation and Without Correlation"
+author: "David Gerard"
+date: "December 20, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I compare updog fits both when fitting correlation and when not fitting correlation.
+
+# Analysis
+
+```{r}
+library(qwraps2)
+
+lazyload_cache_dir("./try_mupdog_1000_cache/html/")
+mout1 <- mout
+rm(mout)
+lazyload_cache_dir("./no_cor_cache/html/")
+mout2 <- mout
+rm(mout)
+```
+
+```{r}
+library(mupdog)
+library(ggplot2)
+index <- 4
+plot(mout1, index) + ggtitle("With Correlation")
+plot(mout2, index) + ggtitle("Without Correlation")
+```
+
+```{r}
+index <- 10
+plot(mout1, index) + ggtitle("With Correlation")
+plot(mout2, index) + ggtitle("Without Correlation")
+```
+
+In low-bias SNP's, the difference is minor
+```{r}
+index <- 1
+plot(mout1, index) + ggtitle("With Correlation")
+plot(mout2, index) + ggtitle("Without Correlation")
+```
+
+```{r}
+index <- 2
+plot(mout1, index) + ggtitle("With Correlation")
+plot(mout2, index) + ggtitle("Without Correlation")
+```

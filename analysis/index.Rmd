@@ -9,3 +9,6 @@ output:
 * [Exploring a new generalization of the BB to allow for correlation.](explore_mbb.html) The observations appear to be marginally beta-binomial, which is really cool. The sample correlation looks about the same as the "correlation" matrix used in the conditional distributions. 
 * [The integral over the log BB density checks out](check_bb_integral.html)
 * [mupdog looks pretty good for a first try!](try_mupdog_1.html) Interestingly, those inbreeding coefficients just don't matter.
+* [mupdog still looks good when using 1000 Shirasawa SNPs](try_mupdog_1000.html). No major difference here than with using 500 SNPs.
+* [When contrain correlations to be 0, inbreeding still estimated to be 0.](no_cor.html) Also, in high-bias SNP's, some of the genotyping seems a little off.
+* [Benefits of fitting correlation mostly apparent in high-bias SNPs](compare_cor_nocor.html)
