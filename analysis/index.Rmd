@@ -12,3 +12,4 @@ output:
 * [mupdog still looks good when using 1000 Shirasawa SNPs](try_mupdog_1000.html). No major difference here than with using 500 SNPs.
 * [When contrain correlations to be 0, inbreeding still estimated to be 0.](no_cor.html) Also, in high-bias SNP's, some of the genotyping seems a little off.
 * [Benefits of fitting correlation mostly apparent in high-bias SNPs](compare_cor_nocor.html)
+* [awesome results using the data from uidewilligen et al.](uitdewilligen.html) (1) The correlation matrix clearly clusters into two distinct groups. I wonder if there was a family in one group and the general population in the other. (2) High coverage SNPs look bad but moderate coverage SNP's look fantastic. Are the high-coverage SNP's due to something like copy number variation? (3) Inbreeding is more important in this non-sib population.

@@ -1,0 +1,150 @@
+---
+title: "uitdewilligen"
+author: "David Gerard"
+date: "December 20, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I try out mupdog on the data from
+
+Uitdewilligen, Jan GAML, et al. "[A next-generation sequencing method for genotyping-by-sequencing of highly heterozygous autotetraploid potato.](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0062355)" PLoS One 8.5 (2013): e62355.
+
+Which may be obtained here:
+
+https://doi.org/10.1371/journal.pone.0062355
+
+# Extract Data from VCF
+```{r, eval=FALSE}
+library(vcfR)
+
+uit <- read.vcfR(file = "~/Data/uitdewilligen_raw_data/NewPlusOldCalls.headed.vcf")
+
+## DP = read-depth
+## AA = alternative allele
+## GT = genotype
+## GQ = genotype quality
+## GL = log-10 scaled likelihood of genotype
+## RA = reference allele
+## DP = read-depth
+refmat  <- extract.gt(uit, element = "RA")
+class(refmat) <- "numeric"
+altmat  <- extract.gt(uit, element = "AA")
+class(altmat) <- "numeric"
+sizemat <- extract.gt(uit, element = "DP")
+class(sizemat) <- "numeric"
+
+refmat[1000,10]
+altmat[1000,10]
+sizemat[1000, 10]
+
+
+depth_vec <- rowMeans(sizemat)
+order_vec <- order(depth_vec, decreasing = TRUE)[1:sum(depth_vec >= 100, na.rm = TRUE)]
+
+summary(depth_vec[order_vec])
+
+saveRDS(file = "../data/uitdewilligen_snps.RDS", list(refmat = t(refmat[order_vec, ]), sizemat = t(sizemat[order_vec, ]), ploidy = 4))
+```
+
+# Some EDA
+```{r}
+library(mupdog)
+library(updog)
+library(tidyverse)
+```
+
+```{r, eval = FALSE}
+inlist <- readRDS("../data/uitdewilligen_snps.RDS")
+refmat  <- inlist$refmat
+sizemat <- inlist$sizemat
+ploidy  <- inlist$ploidy
+```
+
+```{r, eval = FALSE}
+set.seed(50)
+for (index in sample(1:nrow(refmat), 20)) {
+  pl <- plot_geno(ocounts = refmat[, index], osize = sizemat[, index], ploidy = ploidy)
+  print(pl)
+}
+```
+
+
+```{r, eval = FALSE}
+mout <- mupdog(refmat = refmat, sizemat = sizemat, ploidy = ploidy, verbose = TRUE, num_clust = 7,
+               control = list(obj_tol = 10^-5, itermax = 200))
+saveRDS(mout, "../output/uit_fit/fit_uit1.RDS")
+```
+
+```{r}
+mout <- readRDS("../output/uit_fit/fit_uit1.RDS")
+```
+
+
+In non-sib populations, it seems that overdispersion on the genotypes is more important:
+```{r}
+qplot(mout$inbreeding, bins = 30) +
+  theme_bw()
+```
+
+
+Our prior for the sequencing error rate is a little off. Seems that it should have a mean of around -6 and a variance of around 0.5 (using mad to estimate this due to bad SNP's).
+```{r}
+logitseq <- log(mout$seq / (1 - mout$seq))
+qplot(logitseq, bins = 30) +
+  theme_bw()
+mad(logitseq) ^ 2
+median(logitseq)
+```
+
+The log-bias seems to have some heavy tails, but it is generally between -2 and 2, as our prior states. There seems to be a slight negative bias (in direction of reference), which makes sense.
+```{r}
+logbias <- log(mout$bias)
+qplot(logbias, bins = 30) +
+  theme_bw()
+```
+
+I would remove all SNP's with an overdispersion parameter greater than 0.05.
+```{r}
+qplot(mout$od, bins = 30) +
+  theme_bw()
+```
+
+
+I don't know why there is some negative correlation here.
+```{r}
+hist(mout$cor_mat[upper.tri(mout$cor_mat)])
+```
+
+There seems to be two distinct groups, which is super cool! Maybe there was a cluster of relatives here.
+```{r}
+library(corrplot)
+corrplot(corr = mout$cor_mat, method = "square", order = "hclust")
+```
+
+
+The genes with the largest read depth look horrible
+```{r}
+for (index in 1:5) {
+  pl <- plot(mout, index)
+  print(pl)
+}
+```
+
+My guess is that these aren't real genes, but a combination of multiple genes that look the same. E.g. this could be due to copy number variation.
+
+The genes with moderate to small read depth look really good
+```{r}
+for (index in 20001:20005) {
+  pl <- plot(mout, index)
+  print(pl)
+}
+```
+
+
+

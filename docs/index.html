@@ -20,8 +20,8 @@
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -31,10 +31,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -215,6 +217,7 @@ $(document).ready(function () {
 <li><a href="try_mupdog_1000.html">mupdog still looks good when using 1000 Shirasawa SNPs</a>. No major difference here than with using 500 SNPs.</li>
 <li><a href="no_cor.html">When contrain correlations to be 0, inbreeding still estimated to be 0.</a> Also, in high-bias SNP’s, some of the genotyping seems a little off.</li>
 <li><a href="compare_cor_nocor.html">Benefits of fitting correlation mostly apparent in high-bias SNPs</a></li>
+<li><a href="uitdewilligen.html">awesome results using the data from uidewilligen et al.</a> (1) The correlation matrix clearly clusters into two distinct groups. I wonder if there was a family in one group and the general population in the other. (2) High coverage SNPs look bad but moderate coverage SNP’s look fantastic. Are the high-coverage SNP’s due to something like copy number variation? (3) Inbreeding is more important in this non-sib population.</li>
 </ul>
 
 <hr>
