@@ -1,0 +1,48 @@
+---
+title: "Look at Individual with High OD on Genotypes"
+author: "David Gerard"
+date: "January 2, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Individual 51 has a very high overdispersion parameter on the genotypes. We'll see what his count distribution looks like.
+
+# Analysis
+
+```{r}
+library(tidyverse)
+library(mupdog)
+library(updog)
+mout <- readRDS("../output/uit_fit/fit_uit1.RDS")
+```
+
+```{r}
+hist(mout$inbreeding)
+is_huge <- mout$inbreeding > 0.9
+bad_ind <- which(is_huge)
+bad_ind
+```
+
+This individual has almost all of his read-counts belonging to the reference.
+```{r}
+hist(mout$input$refmat[bad_ind, ] / mout$input$sizemat[bad_ind, ], main = "proportion of readcounts reference", xlab = "prop reference")
+```
+
+There are many SNPs where individual 51 is all by himself.
+```{r, warning=FALSE}
+for (i in 105:110) {
+  index <- order(mout$allele_freq, decreasing = FALSE)[i]
+  pl <- plot_geno(ocounts = mout$input$refmat[, index], osize = mout$input$sizemat[, index], 
+                  ploidy = mout$input$ploidy, ogeno = is_huge * 1) + scale_color_discrete(name = "ind 51")
+  plot(pl)
+}
+
+```
+
+
