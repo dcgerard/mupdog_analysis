@@ -11,9 +11,8 @@
 
 <meta name="author" content="David Gerard" />
 
-<meta name="date" content="2017-12-20" />
 
-<title>uitdewilligen</title>
+<title>Depth</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -302,57 +301,24 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">uitdewilligen</h1>
+<h1 class="title toc-ignore">Depth</h1>
 <h4 class="author"><em>David Gerard</em></h4>
-<h4 class="date"><em>December 20, 2017</em></h4>
+<h4 class="date"><em>January 2, 2018</em></h4>
 
 </div>
 
 
 <div id="abstract" class="section level1">
 <h1>Abstract</h1>
-<p>I try out mupdog on the data from</p>
-<p>Uitdewilligen, Jan GAML, et al. “<a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0062355">A next-generation sequencing method for genotyping-by-sequencing of highly heterozygous autotetraploid potato.</a>” PLoS One 8.5 (2013): e62355.</p>
-<p>Which may be obtained here:</p>
-<p><a href="https://doi.org/10.1371/journal.pone.0062355" class="uri">https://doi.org/10.1371/journal.pone.0062355</a></p>
+<p>Look at how depth is related to bias, overdispersion, and sequencing error estimates.</p>
 </div>
-<div id="extract-data-from-vcf" class="section level1">
-<h1>Extract Data from VCF</h1>
-<pre class="r"><code>library(vcfR)
-
-uit &lt;- read.vcfR(file = &quot;~/Data/uitdewilligen_raw_data/NewPlusOldCalls.headed.vcf&quot;)
-
-## DP = read-depth
-## AA = alternative allele
-## GT = genotype
-## GQ = genotype quality
-## GL = log-10 scaled likelihood of genotype
-## RA = reference allele
-## DP = read-depth
-refmat  &lt;- extract.gt(uit, element = &quot;RA&quot;)
-class(refmat) &lt;- &quot;numeric&quot;
-altmat  &lt;- extract.gt(uit, element = &quot;AA&quot;)
-class(altmat) &lt;- &quot;numeric&quot;
-sizemat &lt;- extract.gt(uit, element = &quot;DP&quot;)
-class(sizemat) &lt;- &quot;numeric&quot;
-
-refmat[1000,10]
-altmat[1000,10]
-sizemat[1000, 10]
-
-
-depth_vec &lt;- rowMeans(sizemat)
-order_vec &lt;- order(depth_vec, decreasing = TRUE)[1:sum(depth_vec &gt;= 100, na.rm = TRUE)]
-
-summary(depth_vec[order_vec])
-
-saveRDS(file = &quot;../data/uitdewilligen_snps.RDS&quot;, list(refmat = t(refmat[order_vec, ]), sizemat = t(sizemat[order_vec, ]), ploidy = 4))</code></pre>
-</div>
-<div id="run-mupdog" class="section level1">
-<h1>Run mupdog</h1>
-<pre class="r"><code>library(mupdog)
-library(updog)
-library(tidyverse)</code></pre>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<p>Read in output from <a href="uitdewilligen.html">here</a>.</p>
+<pre class="r"><code>mout &lt;- readRDS(&quot;../output/uit_fit/fit_uit1.RDS&quot;)</code></pre>
+<p>Since the genes are ordered by read-depth, we can plot the sequencing error rate, overdispersion, and bias estimates versus the order to see what effect the read-depth has on these estimates.</p>
+<p>There is a definite enrichment of higher sequencing error rates in high-coverage SNPs.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
 <pre><code>## Loading tidyverse: ggplot2
 ## Loading tidyverse: tibble
 ## Loading tidyverse: tidyr
@@ -362,65 +328,78 @@ library(tidyverse)</code></pre>
 <pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
 <pre><code>## filter(): dplyr, stats
 ## lag():    dplyr, stats</code></pre>
-<pre class="r"><code>inlist &lt;- readRDS(&quot;../data/uitdewilligen_snps.RDS&quot;)
-refmat  &lt;- inlist$refmat
-sizemat &lt;- inlist$sizemat
-ploidy  &lt;- inlist$ploidy</code></pre>
-<pre class="r"><code>set.seed(50)
-for (index in sample(1:nrow(refmat), 20)) {
-  pl &lt;- plot_geno(ocounts = refmat[, index], osize = sizemat[, index], ploidy = ploidy)
+<pre class="r"><code>theme_set(theme_bw())
+n &lt;- nrow(mout$input$refmat)
+p &lt;- length(mout$seq)
+qplot(1:p, mout$seq)</code></pre>
+<p><img src="depth_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>There appears to be a small enrichment of high bias in high coverage SNPs.</p>
+<pre class="r"><code>qplot(1:p, abs(log(mout$bias, base = 2)), ylab = &quot;absolute log-bias&quot;)</code></pre>
+<p><img src="depth_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>There appears to be no relationship between coverage and overdispersion.</p>
+<pre class="r"><code>qplot(1:p, log(mout$od / (1 - mout$od)), ylab = &quot;logit-od&quot;)</code></pre>
+<p><img src="depth_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Frequency of estimated genotypes distribution. There are only 84 individuals.</p>
+<pre class="r"><code>freq_mat &lt;- apply(rbind(mout$map_dosage, matrix(rep(0:mout$input$ploidy, times = p), nrow = mout$input$ploidy + 1)), 2, table) - 1
+max_freq &lt;- apply(freq_mat, 2, max)
+max_freq_dist &lt;- table(max_freq)
+plot(max_freq_dist, type = &quot;h&quot;)</code></pre>
+<p><img src="depth_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>If we remove SNPs with sequencing error rates greater than 5% log2-bias outside of [-2,2], does the high-coverage SNPs then look good? I’ll also remove SNPs with od &gt; 0.05 and SNPs that are estimated to be non-biallelic. To find non-ballelic SNPs, we’ll say that the minor allele needs to be present in at least 5% of the individuals, which is about 4 people here.</p>
+<pre class="r"><code>library(mupdog)
+good_seq  &lt;- mout$seq &lt; 0.05
+good_bias &lt;- (log(mout$bias, base = 2) &gt;= -2) &amp; (log(mout$bias, base = 2) &lt;= 2)
+good_od   &lt;- mout$od &lt; 0.05
+
+
+min_num_alt &lt;- round(n * 0.05)
+good_bi     &lt;- max_freq &gt;= min_num_alt &amp; max_freq &lt;= n - min_num_alt
+  
+good_snps &lt;- good_seq &amp; good_bias &amp; good_od &amp; good_bi</code></pre>
+<p>After filtering, most of them look good. A couple look bad.</p>
+<pre class="r"><code>snp_num &lt;- (1:p)[good_snps]
+for (index in snp_num[1:20]) {
+  pl &lt;- plot(mout, index = index)
   print(pl)
 }</code></pre>
-<pre class="r"><code>mout &lt;- mupdog(refmat = refmat, sizemat = sizemat, ploidy = ploidy, verbose = TRUE, num_clust = 7,
-               control = list(obj_tol = 10^-5, itermax = 200))
-saveRDS(mout, &quot;../output/uit_fit/fit_uit1.RDS&quot;)</code></pre>
-</div>
-<div id="analyze-output" class="section level1">
-<h1>Analyze Output</h1>
-<pre class="r"><code>mout &lt;- readRDS(&quot;../output/uit_fit/fit_uit1.RDS&quot;)</code></pre>
-<p>In non-sib populations, it seems that overdispersion on the genotypes is more important:</p>
-<pre class="r"><code>qplot(mout$inbreeding, bins = 30) +
-  theme_bw()</code></pre>
-<p><img src="uitdewilligen_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<p>Our prior for the sequencing error rate is a little off. Seems that it should have a mean of around -6 and a variance of around 0.5 (using mad to estimate this due to bad SNP’s).</p>
-<pre class="r"><code>logitseq &lt;- log(mout$seq / (1 - mout$seq))
-qplot(logitseq, bins = 30) +
-  theme_bw()</code></pre>
-<p><img src="uitdewilligen_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
-<pre class="r"><code>mad(logitseq) ^ 2</code></pre>
-<pre><code>## [1] 0.5232</code></pre>
-<pre class="r"><code>median(logitseq)</code></pre>
-<pre><code>## [1] -6.142</code></pre>
-<p>The log-bias seems to have some heavy tails. Our prior states it should be somewhere between -2 and 2. The ones with the high bias might be removable. There seems to be a slight negative bias in the distribution of the bias parameter (in direction of reference), which makes sense.</p>
-<pre class="r"><code>logbias &lt;- log(mout$bias, base = 2)
-qplot(logbias, bins = 30) +
-  theme_bw()</code></pre>
-<p><img src="uitdewilligen_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
-<p>I would remove all SNP’s with an overdispersion parameter greater than 0.05.</p>
-<pre class="r"><code>qplot(mout$od, bins = 30) +
-  theme_bw()</code></pre>
-<p><img src="uitdewilligen_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
-<p>I don’t know why there is some negative correlation here.</p>
-<pre class="r"><code>hist(mout$cor_mat[upper.tri(mout$cor_mat)])</code></pre>
-<p><img src="uitdewilligen_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
-<p>There seems to be two distinct groups, which is super cool! Maybe there was a cluster of relatives here.</p>
-<pre class="r"><code>library(corrplot)</code></pre>
-<pre><code>## corrplot 0.84 loaded</code></pre>
-<pre class="r"><code>corrplot(corr = mout$cor_mat, method = &quot;square&quot;, order = &quot;hclust&quot;)</code></pre>
-<p><img src="uitdewilligen_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
-<p>The genes with the largest read depth look horrible</p>
-<pre class="r"><code>for (index in 1:5) {
-  pl &lt;- plot(mout, index)
-  print(pl)
-}</code></pre>
-<p><img src="uitdewilligen_files/figure-html/unnamed-chunk-13-1.png" width="672" /><img src="uitdewilligen_files/figure-html/unnamed-chunk-13-2.png" width="672" /><img src="uitdewilligen_files/figure-html/unnamed-chunk-13-3.png" width="672" /><img src="uitdewilligen_files/figure-html/unnamed-chunk-13-4.png" width="672" /><img src="uitdewilligen_files/figure-html/unnamed-chunk-13-5.png" width="672" /></p>
-<p>My guess is that these aren’t real genes, but a combination of multiple genes that look the same. E.g. this could be due to copy number variation.</p>
-<p>The genes with moderate to small read depth look really good</p>
-<pre class="r"><code>for (index in 20001:20005) {
-  pl &lt;- plot(mout, index)
-  print(pl)
-}</code></pre>
-<p><img src="uitdewilligen_files/figure-html/unnamed-chunk-14-1.png" width="672" /><img src="uitdewilligen_files/figure-html/unnamed-chunk-14-2.png" width="672" /><img src="uitdewilligen_files/figure-html/unnamed-chunk-14-3.png" width="672" /><img src="uitdewilligen_files/figure-html/unnamed-chunk-14-4.png" width="672" /><img src="uitdewilligen_files/figure-html/unnamed-chunk-14-5.png" width="672" /></p>
+<p><img src="depth_files/figure-html/unnamed-chunk-7-1.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-2.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-3.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-4.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-5.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-6.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-7.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-8.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-9.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-10.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-11.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-12.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-13.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-14.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-15.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-16.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-17.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-18.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-19.png" width="672" /><img src="depth_files/figure-html/unnamed-chunk-7-20.png" width="672" /></p>
+<p>Our filters removed many more SNPs that had high read-coverage than SNPs that had moderate read-coverage. There is an increasing trend to keep until about the 10,000th SNP. Then there is a decreasing trend.</p>
+<pre class="r"><code>ordering &lt;- 1:p
+good_snps_num &lt;- good_snps * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = &quot;loess&quot;) +
+  ggtitle(&quot;Proportion Overall Filter Kept&quot;) +
+  xlab(&quot;Depth Order&quot;) +
+  ylab(&quot;Proportion Kept&quot;)</code></pre>
+<p><img src="depth_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<pre class="r"><code>good_snps_num &lt;- good_seq * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = &quot;loess&quot;) +
+  ggtitle(&quot;Proportion Seq Filter Kept&quot;) +
+  xlab(&quot;Depth Order&quot;) +
+  ylab(&quot;Proportion Kept&quot;)</code></pre>
+<p><img src="depth_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code>good_snps_num &lt;- good_bias * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = &quot;loess&quot;) +
+  ggtitle(&quot;Proportion Bias Filter Kept&quot;) +
+  xlab(&quot;Depth Order&quot;) +
+  ylab(&quot;Proportion Kept&quot;)</code></pre>
+<p><img src="depth_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>good_snps_num &lt;- good_od * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = &quot;loess&quot;) +
+  ggtitle(&quot;Proportion OD Filter Kept&quot;) +
+  xlab(&quot;Depth Order&quot;) +
+  ylab(&quot;Proportion Kept&quot;)</code></pre>
+<p><img src="depth_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>good_snps_num &lt;- good_bi * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = &quot;loess&quot;) +
+  ggtitle(&quot;Proportion Bi-allelic Filter Kept&quot;) +
+  xlab(&quot;Depth Order&quot;) +
+  ylab(&quot;Proportion Kept&quot;)</code></pre>
+<p><img src="depth_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.3.2 (2016-10-31)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
@@ -438,25 +417,23 @@ qplot(logbias, bins = 30) +
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] corrplot_0.84     dplyr_0.7.4       purrr_0.2.4      
-##  [4] readr_1.0.0       tidyr_0.7.2       tibble_1.3.4     
-##  [7] ggplot2_2.2.1     tidyverse_1.1.1   updog_0.1.0      
-## [10] mupdog_0.0.0.9000
+## [1] mupdog_0.0.0.9000 dplyr_0.7.4       purrr_0.2.4       readr_1.0.0      
+## [5] tidyr_0.7.2       tibble_1.3.4      ggplot2_2.2.1     tidyverse_1.1.1  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.14     plyr_1.8.4       bindr_0.1        forcats_0.2.0   
-##  [5] iterators_1.0.9  tools_3.3.2      digest_0.6.13    lubridate_1.6.0 
+##  [1] Rcpp_0.12.14     plyr_1.8.4       bindr_0.1        iterators_1.0.9 
+##  [5] forcats_0.2.0    tools_3.3.2      digest_0.6.13    lubridate_1.6.0 
 ##  [9] jsonlite_1.5     evaluate_0.10.1  nlme_3.1-131     gtable_0.2.0    
-## [13] lattice_0.20-34  pkgconfig_2.0.1  rlang_0.1.4      psych_1.6.12    
-## [17] foreach_1.4.4    yaml_2.1.16      parallel_3.3.2   haven_1.0.0     
+## [13] lattice_0.20-34  pkgconfig_2.0.1  rlang_0.1.4      foreach_1.4.4   
+## [17] psych_1.6.12     yaml_2.1.16      parallel_3.3.2   haven_1.0.0     
 ## [21] bindrcpp_0.2     xml2_1.1.1       httr_1.3.1       stringr_1.2.0   
 ## [25] knitr_1.17       hms_0.3          rprojroot_1.2    grid_3.3.2      
 ## [29] glue_1.2.0       R6_2.2.2         readxl_0.1.1     foreign_0.8-67  
 ## [33] rmarkdown_1.6    modelr_0.1.0     reshape2_1.4.2   magrittr_1.5    
-## [37] ggthemes_3.4.0   scales_0.4.1     backports_1.0.5  codetools_0.2-15
+## [37] ggthemes_3.4.0   codetools_0.2-15 backports_1.0.5  scales_0.4.1    
 ## [41] htmltools_0.3.6  rvest_0.3.2      assertthat_0.2.0 mnormt_1.5-5    
-## [45] colorspace_1.3-2 labeling_0.3     stringi_1.1.6    lazyeval_0.2.0  
-## [49] munsell_0.4.3    broom_0.4.2</code></pre>
+## [45] colorspace_1.3-2 updog_0.1.0      labeling_0.3     stringi_1.1.6   
+## [49] lazyeval_0.2.0   munsell_0.4.3    broom_0.4.2</code></pre>
 </div>
 
 <hr>

@@ -13,3 +13,4 @@ output:
 * [When contrain correlations to be 0, inbreeding still estimated to be 0.](no_cor.html) Also, in high-bias SNP's, some of the genotyping seems a little off.
 * [Benefits of fitting correlation mostly apparent in high-bias SNPs](compare_cor_nocor.html)
 * [awesome results using the data from uidewilligen et al.](uitdewilligen.html) (1) The correlation matrix clearly clusters into two distinct groups. I wonder if there was a family in one group and the general population in the other. (2) High coverage SNPs look bad but moderate coverage SNP's look fantastic. Are the high-coverage SNP's due to something like copy number variation? (3) Inbreeding is more important in this non-sib population.
+* [Looked at some filtering trends.](depth.html) It seems that there is a higher incidence of bad-SNPs at the higher covered SNPs. Some generous filters seem to keep mostly good-looking SNPs.

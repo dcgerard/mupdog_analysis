@@ -52,7 +52,7 @@ summary(depth_vec[order_vec])
 saveRDS(file = "../data/uitdewilligen_snps.RDS", list(refmat = t(refmat[order_vec, ]), sizemat = t(sizemat[order_vec, ]), ploidy = 4))
 ```
 
-# Some EDA
+# Run mupdog
 ```{r}
 library(mupdog)
 library(updog)
@@ -81,6 +81,8 @@ mout <- mupdog(refmat = refmat, sizemat = sizemat, ploidy = ploidy, verbose = TR
 saveRDS(mout, "../output/uit_fit/fit_uit1.RDS")
 ```
 
+# Analyze Output
+
 ```{r}
 mout <- readRDS("../output/uit_fit/fit_uit1.RDS")
 ```
@@ -102,9 +104,9 @@ mad(logitseq) ^ 2
 median(logitseq)
 ```
 
-The log-bias seems to have some heavy tails, but it is generally between -2 and 2, as our prior states. There seems to be a slight negative bias (in direction of reference), which makes sense.
+The log-bias seems to have some heavy tails. Our prior states it should be somewhere between -2 and 2. The ones with the high bias might be removable. There seems to be a slight negative bias in the distribution of the bias parameter (in direction of reference), which makes sense.
 ```{r}
-logbias <- log(mout$bias)
+logbias <- log(mout$bias, base = 2)
 qplot(logbias, bins = 30) +
   theme_bw()
 ```
@@ -144,6 +146,10 @@ for (index in 20001:20005) {
   pl <- plot(mout, index)
   print(pl)
 }
+```
+
+```{r}
+sessionInfo()
 ```
 
 

@@ -1,0 +1,130 @@
+---
+title: "Depth"
+author: "David Gerard"
+date: "January 2, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Look at how depth is related to bias, overdispersion, and sequencing error estimates.
+
+# Analysis
+
+Read in output from [here](uitdewilligen.html).
+
+```{r}
+mout <- readRDS("../output/uit_fit/fit_uit1.RDS")
+```
+
+Since the genes are ordered by read-depth, we can plot the sequencing error rate, overdispersion, and bias estimates versus the order to see what effect the read-depth has on these estimates.
+
+There is a definite enrichment of higher sequencing error rates in high-coverage SNPs.
+```{r}
+library(tidyverse)
+theme_set(theme_bw())
+n <- nrow(mout$input$refmat)
+p <- length(mout$seq)
+qplot(1:p, mout$seq)
+```
+
+There appears to be a small enrichment of high bias in high coverage SNPs.
+```{r}
+qplot(1:p, abs(log(mout$bias, base = 2)), ylab = "absolute log-bias")
+```
+
+There appears to be no relationship between coverage and overdispersion.
+```{r}
+qplot(1:p, log(mout$od / (1 - mout$od)), ylab = "logit-od")
+```
+
+Frequency of estimated genotypes distribution. There are only 84 individuals.
+```{r}
+freq_mat <- apply(rbind(mout$map_dosage, matrix(rep(0:mout$input$ploidy, times = p), nrow = mout$input$ploidy + 1)), 2, table) - 1
+max_freq <- apply(freq_mat, 2, max)
+max_freq_dist <- table(max_freq)
+plot(max_freq_dist, type = "h")
+```
+
+
+If we remove SNPs with sequencing error rates greater than 5\% log2-bias outside of [-2,2], does the high-coverage SNPs then look good? I'll also remove SNPs with od > 0.05 and SNPs that are estimated to be non-biallelic. To find non-ballelic SNPs, we'll say that the minor allele needs to be present in at least 5\% of the individuals, which is about 4 people here.
+```{r}
+library(mupdog)
+good_seq  <- mout$seq < 0.05
+good_bias <- (log(mout$bias, base = 2) >= -2) & (log(mout$bias, base = 2) <= 2)
+good_od   <- mout$od < 0.05
+
+
+min_num_alt <- round(n * 0.05)
+good_bi     <- max_freq >= min_num_alt & max_freq <= n - min_num_alt
+  
+good_snps <- good_seq & good_bias & good_od & good_bi
+```
+
+After filtering, most of them look good. A couple look bad.
+```{r}
+snp_num <- (1:p)[good_snps]
+for (index in snp_num[1:20]) {
+  pl <- plot(mout, index = index)
+  print(pl)
+}
+
+```
+
+
+Our filters removed many more SNPs that had high read-coverage than SNPs that had moderate read-coverage. There is an increasing trend to keep until about the 10,000th SNP. Then there is a decreasing trend.
+```{r}
+ordering <- 1:p
+good_snps_num <- good_snps * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = "loess") +
+  ggtitle("Proportion Overall Filter Kept") +
+  xlab("Depth Order") +
+  ylab("Proportion Kept")
+```
+
+```{r}
+good_snps_num <- good_seq * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = "loess") +
+  ggtitle("Proportion Seq Filter Kept") +
+  xlab("Depth Order") +
+  ylab("Proportion Kept")
+```
+
+
+```{r}
+good_snps_num <- good_bias * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = "loess") +
+  ggtitle("Proportion Bias Filter Kept") +
+  xlab("Depth Order") +
+  ylab("Proportion Kept")
+```
+
+```{r}
+good_snps_num <- good_od * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = "loess") +
+  ggtitle("Proportion OD Filter Kept") +
+  xlab("Depth Order") +
+  ylab("Proportion Kept")
+```
+
+```{r}
+good_snps_num <- good_bi * 1
+ggplot(data = data_frame(kept = good_snps_num, order = ordering), mapping = aes(x = ordering, y = kept)) +
+  geom_smooth(method = "loess") +
+  ggtitle("Proportion Bi-allelic Filter Kept") +
+  xlab("Depth Order") +
+  ylab("Proportion Kept")
+```
+
+```{r}
+sessionInfo()
+```
+
