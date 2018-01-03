@@ -1,0 +1,143 @@
+---
+title: "uitdewilligen"
+author: "David Gerard"
+date: "December 20, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I try out mupdog on the data from
+
+Uitdewilligen, Jan GAML, et al. "[A next-generation sequencing method for genotyping-by-sequencing of highly heterozygous autotetraploid potato.](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0062355)" PLoS One 8.5 (2013): e62355.
+
+Which may be obtained here:
+
+https://doi.org/10.1371/journal.pone.0062355
+
+This time, I do not update the correlation matrix (i.e. assumed independent).
+
+# Run mupdog
+```{r}
+library(mupdog)
+library(updog)
+library(tidyverse)
+```
+
+```{r, eval = FALSE}
+inlist <- readRDS("../data/uitdewilligen_snps.RDS")
+refmat  <- inlist$refmat
+sizemat <- inlist$sizemat
+ploidy  <- inlist$ploidy
+```
+
+
+```{r, eval = FALSE}
+mout <- mupdog(refmat = refmat, sizemat = sizemat, ploidy = ploidy, verbose = TRUE, num_clust = 7,
+               control = list(obj_tol = 10^-5, itermax = 200), update_cor = FALSE)
+saveRDS(mout, "../output/uit_fit/fit_uit_nocorr.RDS")
+```
+
+```{r}
+mout <- readRDS("../output/uit_fit/fit_uit_nocorr.RDS")
+mout_corr <- readRDS("../output/uit_fit/fit_uit1.RDS")
+```
+
+```{r, eval=FALSE, echo=FALSE}
+obj_val <- mupdog(refmat = mout$input$refmat, sizemat = mout$input$sizemat, ploidy = mout$input$ploidy, verbose = TRUE, 
+                  seq = mout$seq, bias = mout$bias, od = mout$od, allele_freq = mout$allele_freq, 
+                  inbreeding = mout$inbreeding, cor_mat = mout$cor_mat, postmean = mout$postmean, 
+                  postvar = mout$postvar, update_cor = FALSE, update_inbreeding = FALSE, update_allele_freq = FALSE, 
+                  control = list(itermax = 2))
+mout$obj <- obj_val$obj
+```
+
+There is less concordance between the parameter estimates than I would think --- especially the bias. Though the inbreeding and allele frequency estimates are highly correlated.
+```{r}
+cor(log(mout$bias), log(mout_corr$bias))
+cor(mout$seq, mout_corr$seq)
+cor(mout$od, mout_corr$od)
+cor(mout$inbreeding, mout_corr$inbreeding)
+cor(mout$allele_freq, mout_corr$allele_freq)
+```
+```{r}
+qplot(log(mout$bias), log(mout_corr$bias))
+```
+
+
+Here, I look at SNPs where there is the biggest difference in bias when filtering based on fit using correlation. The fits from assuming independence look really bad and the fits assuming correlation look pretty good!
+```{r}
+good_bias <- mout_corr$bias < 2 & mout_corr$bias > 0.5
+good_seq  <- mout_corr$seq < 0.1
+good_od   <- mout_corr$od < 0.05
+good_snp <- good_bias & good_seq & good_od
+
+temp <- abs(log(mout$bias) - log(mout_corr$bias))
+temp[!good_snp] <- NA
+which_look <- order(temp, decreasing = TRUE, na.last = TRUE)
+
+library(gridExtra)
+index <- 1
+mout_corr$bias[which_look[1]]
+mout$bias[which_look[1]]
+for (i in 1:10) {
+  index <- which_look[i]
+  pl1 <- plot(mout, index) + ggtitle("Assuming Independence")
+  pl2 <- plot(mout_corr, index) + ggtitle("Allowing Correlation")
+  grid.arrange(pl1, pl2, ncol = 2)
+}
+```
+
+
+
+Repeat but use independence fit to filter SNPs. Most of these cases appear to be non-biallelic SNPs.
+```{r}
+good_bias <- mout$bias < 2 & mout$bias > 0.5
+good_seq  <- mout$seq < 0.1
+good_od   <- mout$od < 0.05
+good_snp <- good_bias & good_seq & good_od
+
+temp <- abs(log(mout$bias) - log(mout_corr$bias))
+temp[!good_snp] <- NA
+which_look <- order(temp, decreasing = TRUE, na.last = TRUE)
+
+library(gridExtra)
+index <- 1
+mout_corr$bias[which_look[1]]
+mout$bias[which_look[1]]
+for (i in 1:10) {
+  index <- which_look[i]
+  pl1 <- plot(mout, index) + ggtitle("Assuming Independence")
+  pl2 <- plot(mout_corr, index) + ggtitle("Allowing Correlation")
+  grid.arrange(pl1, pl2, ncol = 2)
+}
+```
+
+
+# Try fitting independence when starting from correlated results
+
+There are differences in the bias. Perhaps mupdog with correlation is less prone to getting stuck in local maxima? But the objective assuming independence isn't higher at the estimates from mupdog with correlation.
+
+```{r, cache=TRUE}
+mout_start_from_corr_obj <- mupdog(refmat = mout_corr$input$refmat, sizemat = mout_corr$input$sizemat, 
+                               ploidy = mout_corr$input$ploidy, verbose = TRUE, 
+                               seq = mout_corr$seq, bias = mout_corr$bias, od = mout_corr$od, 
+                               allele_freq = mout_corr$allele_freq, inbreeding = mout_corr$inbreeding, 
+                               postmean = mout_corr$postmean, postvar = mout_corr$postvar, 
+                               update_cor = FALSE, update_inbreeding = FALSE, update_allele_freq = FALSE, 
+                               control = list(itermax = 2))$obj
+mout$obj
+mout_start_from_corr_obj
+```
+
+
+```{r}
+sessionInfo()
+```
+
+
+

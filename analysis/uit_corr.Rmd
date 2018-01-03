@@ -1,0 +1,56 @@
+---
+title: "Explore Correlation"
+author: "David Gerard"
+date: "January 2, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I play around with the correlation estimates from the uitdewilligen data.
+
+# Analysis
+
+```{r}
+mout <- readRDS("../output/uit_fit/fit_uit1.RDS")
+```
+
+Filters
+```{r}
+good_seq  <- mout$seq < 0.05
+good_bias <- (log(mout$bias, base = 2) >= -2) & (log(mout$bias, base = 2) <= 2)
+good_od   <- mout$od < 0.05
+  
+good_snps <- good_seq & good_bias & good_od
+```
+
+
+See if the correlation is approximately equal to an empirical estimate using the estimated genotypes.
+```{r}
+## empirical CDF of each column
+emp_cdf <- function(x) {
+  n <- length(x)
+  ecdf(x)(x) * ((n - 1) / n)
+}
+
+zhat <- qnorm(apply(mout$map_dosage, 2, emp_cdf))[, good_snps]
+Rhat <- cor(t(zhat))
+```
+
+It's actually very different, though correlated.
+
+```{r}
+plot(mout$cor_mat[upper.tri(mout$cor_mat)], Rhat[upper.tri(Rhat)])
+```
+
+
+
+
+```{r}
+sessionInfo()
+```
+

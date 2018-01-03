@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="David Gerard" />
+
+<meta name="date" content="2017-12-20" />
+
+<title>uitdewilligen</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mupdog</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dcgerard/mupdog">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">uitdewilligen</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>December 20, 2017</em></h4>
+
+</div>
+
+
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>I try out mupdog on the data from</p>
+<p>Uitdewilligen, Jan GAML, et al. “<a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0062355">A next-generation sequencing method for genotyping-by-sequencing of highly heterozygous autotetraploid potato.</a>” PLoS One 8.5 (2013): e62355.</p>
+<p>Which may be obtained here:</p>
+<p><a href="https://doi.org/10.1371/journal.pone.0062355" class="uri">https://doi.org/10.1371/journal.pone.0062355</a></p>
+<p>This time, I do not update the correlation matrix (i.e. assumed independent).</p>
+</div>
+<div id="run-mupdog" class="section level1">
+<h1>Run mupdog</h1>
+<pre class="r"><code>library(mupdog)
+library(updog)
+library(tidyverse)</code></pre>
+<pre><code>## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr</code></pre>
+<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
+<pre><code>## filter(): dplyr, stats
+## lag():    dplyr, stats</code></pre>
+<pre class="r"><code>inlist &lt;- readRDS(&quot;../data/uitdewilligen_snps.RDS&quot;)
+refmat  &lt;- inlist$refmat
+sizemat &lt;- inlist$sizemat
+ploidy  &lt;- inlist$ploidy</code></pre>
+<pre class="r"><code>mout &lt;- mupdog(refmat = refmat, sizemat = sizemat, ploidy = ploidy, verbose = TRUE, num_clust = 7,
+               control = list(obj_tol = 10^-5, itermax = 200), update_cor = FALSE)
+saveRDS(mout, &quot;../output/uit_fit/fit_uit_nocorr.RDS&quot;)</code></pre>
+<pre class="r"><code>mout &lt;- readRDS(&quot;../output/uit_fit/fit_uit_nocorr.RDS&quot;)
+mout_corr &lt;- readRDS(&quot;../output/uit_fit/fit_uit1.RDS&quot;)</code></pre>
+<p>There is less concordance between the parameter estimates than I would think — especially the bias. Though the inbreeding and allele frequency estimates are highly correlated.</p>
+<pre class="r"><code>cor(log(mout$bias), log(mout_corr$bias))</code></pre>
+<pre><code>## [1] 0.2308</code></pre>
+<pre class="r"><code>cor(mout$seq, mout_corr$seq)</code></pre>
+<pre><code>## [1] 0.7158</code></pre>
+<pre class="r"><code>cor(mout$od, mout_corr$od)</code></pre>
+<pre><code>## [1] 0.6272</code></pre>
+<pre class="r"><code>cor(mout$inbreeding, mout_corr$inbreeding)</code></pre>
+<pre><code>## [1] 0.9983</code></pre>
+<pre class="r"><code>cor(mout$allele_freq, mout_corr$allele_freq)</code></pre>
+<pre><code>## [1] 0.9679</code></pre>
+<pre class="r"><code>qplot(log(mout$bias), log(mout_corr$bias))</code></pre>
+<p><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Here, I look at SNPs where there is the biggest difference in bias when filtering based on fit using correlation. The fits from assuming independence look really bad and the fits assuming correlation look pretty good!</p>
+<pre class="r"><code>good_bias &lt;- mout_corr$bias &lt; 2 &amp; mout_corr$bias &gt; 0.5
+good_seq  &lt;- mout_corr$seq &lt; 0.1
+good_od   &lt;- mout_corr$od &lt; 0.05
+good_snp &lt;- good_bias &amp; good_seq &amp; good_od
+
+temp &lt;- abs(log(mout$bias) - log(mout_corr$bias))
+temp[!good_snp] &lt;- NA
+which_look &lt;- order(temp, decreasing = TRUE, na.last = TRUE)
+
+library(gridExtra)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;gridExtra&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     combine</code></pre>
+<pre class="r"><code>index &lt;- 1
+mout_corr$bias[which_look[1]]</code></pre>
+<pre><code>## result.6297 
+##      0.6301</code></pre>
+<pre class="r"><code>mout$bias[which_look[1]]</code></pre>
+<pre><code>## result.6297 
+##       15.55</code></pre>
+<pre class="r"><code>for (i in 1:10) {
+  index &lt;- which_look[i]
+  pl1 &lt;- plot(mout, index) + ggtitle(&quot;Assuming Independence&quot;)
+  pl2 &lt;- plot(mout_corr, index) + ggtitle(&quot;Allowing Correlation&quot;)
+  grid.arrange(pl1, pl2, ncol = 2)
+}</code></pre>
+<p><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-1.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-2.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-3.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-4.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-5.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-6.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-7.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-8.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-9.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-8-10.png" width="672" /></p>
+<p>Repeat but use independence fit to filter SNPs. Most of these cases appear to be non-biallelic SNPs.</p>
+<pre class="r"><code>good_bias &lt;- mout$bias &lt; 2 &amp; mout$bias &gt; 0.5
+good_seq  &lt;- mout$seq &lt; 0.1
+good_od   &lt;- mout$od &lt; 0.05
+good_snp &lt;- good_bias &amp; good_seq &amp; good_od
+
+temp &lt;- abs(log(mout$bias) - log(mout_corr$bias))
+temp[!good_snp] &lt;- NA
+which_look &lt;- order(temp, decreasing = TRUE, na.last = TRUE)
+
+library(gridExtra)
+index &lt;- 1
+mout_corr$bias[which_look[1]]</code></pre>
+<pre><code>## result.1685 
+##      0.1094</code></pre>
+<pre class="r"><code>mout$bias[which_look[1]]</code></pre>
+<pre><code>## result.1685 
+##       1.977</code></pre>
+<pre class="r"><code>for (i in 1:10) {
+  index &lt;- which_look[i]
+  pl1 &lt;- plot(mout, index) + ggtitle(&quot;Assuming Independence&quot;)
+  pl2 &lt;- plot(mout_corr, index) + ggtitle(&quot;Allowing Correlation&quot;)
+  grid.arrange(pl1, pl2, ncol = 2)
+}</code></pre>
+<p><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-1.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-2.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-3.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-4.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-5.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-6.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-7.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-8.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-9.png" width="672" /><img src="uitdewilligen_nocorr_files/figure-html/unnamed-chunk-9-10.png" width="672" /></p>
+</div>
+<div id="try-fitting-independence-when-starting-from-correlated-results" class="section level1">
+<h1>Try fitting independence when starting from correlated results</h1>
+<p>There are differences in the bias. Perhaps mupdog with correlation is less prone to getting stuck in local maxima? But the objective assuming independence isn’t higher at the estimates from mupdog with correlation.</p>
+<pre class="r"><code>mout_start_from_corr_obj &lt;- mupdog(refmat = mout_corr$input$refmat, sizemat = mout_corr$input$sizemat, 
+                               ploidy = mout_corr$input$ploidy, verbose = TRUE, 
+                               seq = mout_corr$seq, bias = mout_corr$bias, od = mout_corr$od, 
+                               allele_freq = mout_corr$allele_freq, inbreeding = mout_corr$inbreeding, 
+                               postmean = mout_corr$postmean, postvar = mout_corr$postvar, 
+                               update_cor = FALSE, update_inbreeding = FALSE, update_allele_freq = FALSE, 
+                               control = list(itermax = 2))$obj</code></pre>
+<pre><code>## Updating posterior means and variances.
+## 
+## Updating seq, bias, and od.
+## 
+##  iteration: 1 
+##  objective: -7286971 
+##        err: Inf</code></pre>
+<pre class="r"><code>mout$obj</code></pre>
+<pre><code>## [1] -7213015</code></pre>
+<pre class="r"><code>mout_start_from_corr_obj</code></pre>
+<pre><code>## [1] -7286971</code></pre>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.3.2 (2016-10-31)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.3 LTS
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] gridExtra_2.2.1   dplyr_0.7.4       purrr_0.2.4      
+##  [4] readr_1.0.0       tidyr_0.7.2       tibble_1.3.4     
+##  [7] ggplot2_2.2.1     tidyverse_1.1.1   updog_0.1.0      
+## [10] mupdog_0.0.0.9000
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_0.12.14     compiler_3.3.2   plyr_1.8.4       bindr_0.1       
+##  [5] forcats_0.2.0    iterators_1.0.9  tools_3.3.2      digest_0.6.13   
+##  [9] lubridate_1.6.0  jsonlite_1.5     evaluate_0.10.1  nlme_3.1-131    
+## [13] gtable_0.2.0     lattice_0.20-34  pkgconfig_2.0.1  rlang_0.1.4     
+## [17] psych_1.6.12     foreach_1.4.4    yaml_2.1.16      parallel_3.3.2  
+## [21] haven_1.0.0      bindrcpp_0.2     xml2_1.1.1       httr_1.3.1      
+## [25] stringr_1.2.0    knitr_1.17       hms_0.3          rprojroot_1.2   
+## [29] grid_3.3.2       glue_1.2.0       R6_2.2.2         readxl_0.1.1    
+## [33] foreign_0.8-67   rmarkdown_1.6    modelr_0.1.0     reshape2_1.4.2  
+## [37] magrittr_1.5     ggthemes_3.4.0   scales_0.4.1     backports_1.0.5 
+## [41] codetools_0.2-15 htmltools_0.3.6  rvest_0.3.2      assertthat_0.2.0
+## [45] mnormt_1.5-5     colorspace_1.3-2 labeling_0.3     stringi_1.1.6   
+## [49] lazyeval_0.2.0   munsell_0.4.3    broom_0.4.2</code></pre>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

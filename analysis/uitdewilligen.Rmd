@@ -87,6 +87,14 @@ saveRDS(mout, "../output/uit_fit/fit_uit1.RDS")
 mout <- readRDS("../output/uit_fit/fit_uit1.RDS")
 ```
 
+```{r, eval=FALSE, echo=FALSE}
+obj_val <- mupdog(refmat = mout$input$refmat, sizemat = mout$input$sizemat, ploidy = mout$input$ploidy, verbose = TRUE, 
+                  seq = mout$seq, bias = mout$bias, od = mout$od, allele_freq = mout$allele_freq, 
+                  inbreeding = mout$inbreeding, cor_mat = mout$cor_mat, postmean = mout$postmean, 
+                  postvar = mout$postvar, update_cor = FALSE, update_inbreeding = FALSE, update_allele_freq = FALSE, 
+                  control = list(itermax = 2))
+mout$obj <- obj_val$obj
+```
 
 In non-sib populations, it seems that overdispersion on the genotypes is more important:
 ```{r}
