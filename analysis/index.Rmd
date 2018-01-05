@@ -17,3 +17,4 @@ output:
 * [Individual 51 of the Uitdewilligen dataset has a super high od parameter on the genotypes.](weird_ind.html) I think its sample is corrupted. The readcounts always either all ref or all alt, even when all of the other individuals are all the other allele.
 * [Cannot get empirical estimated correlation to match estimated correlation.](uit_corr.html)
 * [When fitting without corr, get very different bias estimates and the genotyping results don't look good where they differ.](uitdewilligen_nocorr.html)
+* [Assuming diploid when tetraploid to uitdewilligen data results in lower objective value](uitdewilligen_k2.html)

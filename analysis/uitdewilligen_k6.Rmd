@@ -1,0 +1,91 @@
+---
+title: "uitdewilligen"
+author: "David Gerard"
+date: "December 20, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I try out mupdog on the data from
+
+Uitdewilligen, Jan GAML, et al. "[A next-generation sequencing method for genotyping-by-sequencing of highly heterozygous autotetraploid potato.](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0062355)" PLoS One 8.5 (2013): e62355.
+
+Which may be obtained here:
+
+https://doi.org/10.1371/journal.pone.0062355
+
+Here, I assume the individuals are hexaploid. I want to compare the objective functions.
+
+# Run mupdog
+```{r}
+library(mupdog)
+library(updog)
+library(tidyverse)
+```
+
+```{r, eval = FALSE}
+inlist <- readRDS("../data/uitdewilligen_snps.RDS")
+refmat  <- inlist$refmat
+sizemat <- inlist$sizemat
+ploidy  <- 6 ## major difference here.
+```
+
+
+```{r, eval = FALSE}
+mout <- mupdog(refmat = refmat, sizemat = sizemat, ploidy = ploidy, verbose = TRUE, num_clust = 7,
+               control = list(obj_tol = 10^-5, itermax = 200))
+saveRDS(mout, "../output/uit_fit/fit_uit_6ploid.RDS")
+```
+
+# Analyze Output
+
+Fits assuming diploidy was done [here](uitdewilligen_k2.html) and fits (correctly) assuming tetraploidy was done [here](uitdewilligen.html)
+
+```{r}
+mout2 <- readRDS("../output/uit_fit/fit_uit_2ploid.RDS")
+mout4 <- readRDS("../output/uit_fit/fit_uit1.RDS")
+mout6 <- readRDS("../output/uit_fit/fit_uit_6ploid.RDS")
+```
+
+
+The tetraploid objective is higher. So this is good.
+```{r}
+y <- c(mout2$obj, mout4$obj, mout6$obj)
+x <- c(2, 4, 6)
+qplot(x, y, geom = "line", xlab = "Assumed Ploidy", ylab = "Objective") + theme_bw()
+```
+
+See some hexaploid fits
+```{r}
+for (index in 10001:10005) {
+  pl <- plot(mout6, index)
+  print(pl)
+}
+```
+
+My guess is that mispecifying the ploidy will have the biggest affect on SNPs will allele frequencies close to 0.5. This is mostly true, except for the SNPs that would have been removed based on filters.
+```{r, fig.height=9, fig.width=5}
+library(gridExtra)
+which_indices <- order((mout4$allele_freq - 0.5) ^ 2, decreasing = FALSE)[1:5]
+for (i in 1:length(which_indices)) {
+  cat("index", i, "\n")
+  pl2 <- plot(mout2, which_indices[i]) + ggtitle("2-ploid")
+  pl4 <- plot(mout4, which_indices[i]) + ggtitle("4-ploid")
+  pl6 <- plot(mout6, which_indices[i]) + ggtitle("6-ploid")
+  grid.arrange(pl2, pl4, pl6)
+  cat("\n\n")
+}
+```
+
+
+```{r}
+sessionInfo()
+```
+
+
+
