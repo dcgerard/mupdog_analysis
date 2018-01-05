@@ -9,9 +9,10 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="David Gerard" />
 
 
-<title>Home</title>
+<title>Shirasawa Fix Corr</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,6 +20,9 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-1.1/highlight.js"></script>
@@ -162,6 +166,101 @@ $(document).ready(function () {
 
 
 
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
 
 
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
@@ -202,28 +301,63 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Home</h1>
+<h1 class="title toc-ignore">Shirasawa Fix Corr</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>January 5, 2018</em></h4>
 
 </div>
 
 
-<ul>
-<li><a href="check_0_1.html">I think sufficient conditions are that R is psd and has diagonal entries less than or equal to 1.</a></li>
-<li><a href="explore_mbb.html">Exploring a new generalization of the BB to allow for correlation.</a> The observations appear to be marginally beta-binomial, which is really cool. The sample correlation looks about the same as the “correlation” matrix used in the conditional distributions.</li>
-<li><a href="check_bb_integral.html">The integral over the log BB density checks out</a></li>
-<li><a href="try_mupdog_1.html">mupdog looks pretty good for a first try!</a> Interestingly, those inbreeding coefficients just don’t matter.</li>
-<li><a href="try_mupdog_1000.html">mupdog still looks good when using 1000 Shirasawa SNPs</a>. No major difference here than with using 500 SNPs.</li>
-<li><a href="no_cor.html">When contrain correlations to be 0, inbreeding still estimated to be 0.</a> Also, in high-bias SNP’s, some of the genotyping seems a little off.</li>
-<li><a href="compare_cor_nocor.html">Benefits of fitting correlation mostly apparent in high-bias SNPs</a></li>
-<li><a href="uitdewilligen.html">awesome results using the data from uidewilligen et al.</a> (1) The correlation matrix clearly clusters into two distinct groups. I wonder if there was a family in one group and the general population in the other. (2) High coverage SNPs look bad but moderate coverage SNP’s look fantastic. Are the high-coverage SNP’s due to something like copy number variation? (3) Inbreeding is more important in this non-sib population.</li>
-<li><a href="depth.html">Looked at some filtering trends.</a> It seems that there is a higher incidence of bad-SNPs at the higher covered SNPs. Some generous filters seem to keep mostly good-looking SNPs.</li>
-<li><a href="weird_ind.html">Individual 51 of the Uitdewilligen dataset has a super high od parameter on the genotypes.</a> I think its sample is corrupted. The readcounts always either all ref or all alt, even when all of the other individuals are all the other allele.</li>
-<li><a href="uit_corr.html">Cannot get empirical estimated correlation to match estimated correlation.</a></li>
-<li><a href="uitdewilligen_nocorr.html">When fitting without corr, get very different bias estimates and the genotyping results don’t look good where they differ.</a></li>
-<li><a href="uitdewilligen_k2.html">Assuming diploid when tetraploid to uitdewilligen data results in lower objective value</a></li>
-<li><a href="uitdewilligen_k6.html">Assuming hexaploid when tetraploid to uitdewilligen data results in lower objective value</a></li>
-<li><a href="shir_fix_corr.html">Adding correlation helps in mislabelings in Shirasawa data</a></li>
-</ul>
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>I fit mupdog to the Shirasawa data assuming a small amount of positive correlation.</p>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<p>Read in previous fits</p>
+<pre class="r"><code>library(mupdog)
+shirfit &lt;- readRDS(&quot;../output/shir_fit/shir_fit_corr.RDS&quot;)</code></pre>
+<p>Calculate new correlation matrix</p>
+<pre class="r"><code>rho &lt;- 0.2
+cormat &lt;- matrix(rho, ncol = nrow(shirfit$input$refmat), nrow = nrow(shirfit$input$refmat))
+diag(cormat) &lt;- 1</code></pre>
+<p>Fit mupdog</p>
+<pre class="r"><code>newfit &lt;- mupdog(refmat = shirfit$input$refmat, sizemat = shirfit$input$sizemat, ploidy = shirfit$input$ploidy, 
+                 verbose = TRUE, seq = shirfit$seq, bias = shirfit$bias, od = shirfit$od, 
+                 allele_freq = shirfit$allele_freq, inbreeding = shirfit$inbreeding, 
+                 cor_mat = cormat, postmean = shirfit$postmean, postvar = shirfit$postvar, 
+                 update_cor = FALSE, update_inbreeding = TRUE, update_allele_freq = TRUE, 
+                 num_core = 7, control = list(obj_tol = 10^-5))
+saveRDS(newfit, &quot;../output/shir_fit/shir_fit_corr_all2.RDS&quot;)</code></pre>
+<pre class="r"><code>shirfit2 &lt;- readRDS(&quot;../output/shir_fit/shir_fit_corr_all2.RDS&quot;)</code></pre>
+<p>We don’t get as many mislabelings, which is kind of cool. But I wish the estimated correlation matrix would have picked this up.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr</code></pre>
+<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
+<pre><code>## filter(): dplyr, stats
+## lag():    dplyr, stats</code></pre>
+<pre class="r"><code>library(gridExtra)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;gridExtra&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     combine</code></pre>
+<pre class="r"><code>for (index in 1:10) {
+  pl1 &lt;- plot(shirfit, index) + ggtitle(&quot;Unconstrained Corr&quot;)
+  pl2 &lt;- plot(shirfit2, index) + ggtitle(&quot;Constrained Corr (all 0.2)&quot;)
+  gridExtra::grid.arrange(pl1, pl2, ncol = 2)
+}</code></pre>
+<p><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).
+
+## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-2.png" width="672" /><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-3.png" width="672" /><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-4.png" width="672" /><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-5.png" width="672" /><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-6.png" width="672" /><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-7.png" width="672" /><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-8.png" width="672" /><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-9.png" width="672" /><img src="shir_fix_corr_files/figure-html/unnamed-chunk-5-10.png" width="672" /></p>
+</div>
 
 <hr>
 <p>
@@ -251,6 +385,8 @@ $(document).ready(function () {
 -->
 
 
+</div>
+</div>
 
 </div>
 

@@ -1,0 +1,57 @@
+---
+title: "Shirasawa Fix Corr"
+author: "David Gerard"
+date: "January 5, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I fit mupdog to the Shirasawa data assuming a small amount of positive correlation.
+
+# Analysis
+
+Read in previous fits
+```{r}
+library(mupdog)
+shirfit <- readRDS("../output/shir_fit/shir_fit_corr.RDS")
+```
+
+Calculate new correlation matrix
+```{r}
+rho <- 0.2
+cormat <- matrix(rho, ncol = nrow(shirfit$input$refmat), nrow = nrow(shirfit$input$refmat))
+diag(cormat) <- 1
+```
+
+Fit mupdog
+```{r, eval=FALSE}
+newfit <- mupdog(refmat = shirfit$input$refmat, sizemat = shirfit$input$sizemat, ploidy = shirfit$input$ploidy, 
+                 verbose = TRUE, seq = shirfit$seq, bias = shirfit$bias, od = shirfit$od, 
+                 allele_freq = shirfit$allele_freq, inbreeding = shirfit$inbreeding, 
+                 cor_mat = cormat, postmean = shirfit$postmean, postvar = shirfit$postvar, 
+                 update_cor = FALSE, update_inbreeding = TRUE, update_allele_freq = TRUE, 
+                 num_core = 7, control = list(obj_tol = 10^-5))
+saveRDS(newfit, "../output/shir_fit/shir_fit_corr_all2.RDS")
+```
+
+```{r}
+shirfit2 <- readRDS("../output/shir_fit/shir_fit_corr_all2.RDS")
+```
+
+We don't get as many mislabelings, which is kind of cool. But I wish the estimated correlation matrix would have picked this up.
+```{r}
+library(tidyverse)
+library(gridExtra)
+for (index in 1:10) {
+  pl1 <- plot(shirfit, index) + ggtitle("Unconstrained Corr")
+  pl2 <- plot(shirfit2, index) + ggtitle("Constrained Corr (all 0.2)")
+  gridExtra::grid.arrange(pl1, pl2, ncol = 2)
+}
+```
+
+

@@ -19,3 +19,4 @@ output:
 * [When fitting without corr, get very different bias estimates and the genotyping results don't look good where they differ.](uitdewilligen_nocorr.html)
 * [Assuming diploid when tetraploid to uitdewilligen data results in lower objective value](uitdewilligen_k2.html)
 * [Assuming hexaploid when tetraploid to uitdewilligen data results in lower objective value](uitdewilligen_k6.html)
+* [Adding correlation helps in mislabelings in Shirasawa data](shir_fix_corr.html)
