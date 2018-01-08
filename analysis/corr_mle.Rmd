@@ -1,0 +1,96 @@
+---
+title: "Check MLE of Correlation Matrix"
+author: "David Gerard"
+date: "January 8, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Suppose we observed a sample covariance matrix
+$$
+S = 
+\left(
+\begin{array}{cc}
+c& \rho\\
+\rho & 1
+\end{array}
+\right),
+$$
+where S is p.d., and we want to estimate a correlation matrix
+$$
+R = 
+\left(
+\begin{array}{cc}
+1 & a\\
+a & 1
+\end{array}
+\right),
+$$
+where $a$ is between 0 and 1. We want to maximize the following objective function
+$$
+-logdet(R) - tr(R^{-1}S).
+$$
+
+Under unconstrained maximization of $R$ (so the diagonals need not be 1), we get $\hat{R} = S$.
+
+We want to explore if $a$ is equal to $\rho / \sqrt{c}$. If not, then we are updating the correlation matrix incorrectly in mupdog.
+
+# Analysis
+
+We write out our objective function
+```{r}
+fn <- function(a, c, rho) {
+  -log(1 - a^2) - (c - 2 * a * rho + 1) / (1 - a ^ 2)
+}
+```
+
+Check my function
+```{r}
+a <- 0.5
+c <- 2
+rho <- 0.75
+
+R <- matrix(c(1, a, a, 1), nrow = 2)
+S <- matrix(c(c, rho, rho, 1), nrow = 2)
+-determinant(R, logarithm = TRUE)$modulus - sum(diag(solve(R) %*% S))
+fn(a, c, rho)
+```
+
+Maximize fn over $a$ and get something other than $\rho / \sqrt{c}$.
+
+```{r}
+a <- 0.5
+c <- 2
+rho <- 0.75
+
+oout <- optim(par = rho / sqrt(c), fn = fn, 
+              method = "Brent", lower = 0, upper = 0.999,
+              control = list(fnscale = -1),
+              c = c, rho = rho)
+oout$par
+rho / sqrt(c)
+oout$value
+fn(rho / sqrt(c), c, rho)
+```
+
+If we set $c = 1$, we then get $\hat{a} = \rho / \sqrt{c}$.
+```{r}
+a <- 0.5
+c <- 1
+rho <- 0.75
+
+oout <- optim(par = rho / sqrt(c), fn = fn, 
+              method = "Brent", lower = 0, upper = 0.999,
+              control = list(fnscale = -1),
+              c = c, rho = rho)
+oout$par
+rho / sqrt(c)
+oout$value
+fn(rho / sqrt(c), c, rho)
+```
+

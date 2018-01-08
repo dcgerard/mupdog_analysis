@@ -20,3 +20,4 @@ output:
 * [Assuming diploid when tetraploid to uitdewilligen data results in lower objective value](uitdewilligen_k2.html)
 * [Assuming hexaploid when tetraploid to uitdewilligen data results in lower objective value](uitdewilligen_k6.html)
 * [Adding correlation helps in mislabelings in Shirasawa data](shir_fix_corr.html)
+* [I am updating the correlation matrix incorrectly.](corr_mle.html) I don't know yet how much this matters.
