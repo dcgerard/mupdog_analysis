@@ -1,0 +1,105 @@
+---
+title: "Normal BB"
+author: "David Gerard"
+date: "January 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I explore properties of what I will call the normal-beta-binomial model. Specifically, this is a generative model defined by the two-step process:
+$$
+z \sim N(0, \sigma^2),\\
+y = F^{-1}(\Phi(z)|\alpha, \tau),
+$$
+where $F^{-1}(\cdot | \alpha, \tau)$ is the quantile function of a beta-binomial random variable with mean $\alpha$ and overdispersion parameter $\tau$, and $\Phi(\cdot)$ is the *standard* normal CDF.
+
+# Analysis
+
+First, make sure that the normal copula model does indeed result in bb
+```{r}
+library(mupdog)
+library(tidyverse)
+K     <- 6
+mu    <- 5/6
+rho   <- 0.01
+n     <- 400000
+sigma <- 1
+
+z <- rnorm(n = n, mean = 0, sd = sigma)
+simout_nbb <- qbetabinom(p = pnorm(z), size = K, mu = mu, rho = rho)
+
+emp_dist <- c(table(simout_nbb) / n)
+theo_dist <- dbetabinom(0:K, K, mu, rho, FALSE)
+
+qplot(emp_dist, theo_dist) + theme_bw() + geom_abline(lty = 2)
+
+mean(simout_nbb) ## should be about 5
+```
+
+
+What if we vary the SD. We don't still get $K\mu$.
+```{r, cache=TRUE}
+K <- 6
+mu <- 5/6
+rho <- 0.01
+n <- 400000
+sigmaseq <- 10 ^ seq(-2, 3, length = 20)
+xbar <- rep(NA, length(sigmaseq))
+for (index in 1:length(xbar)) {
+  z <- rnorm(n = n, mean = 0, sd = sigmaseq[index])
+  simout_nbb <- qbetabinom(p = pnorm(z), size = K, mu = mu, rho = rho)
+  xbar[index] <- mean(simout_nbb)
+}
+
+qplot(log(sigmaseq, base = 10), xbar, xlab = "log (base 10) sd", ylab = "mean", geom = "line", main = "Mean of BB is 5") + theme_bw()
+```
+
+Interestingly, when you decrease the variance a little bit the mean goes up then goes back down to 5. When you increase the variance, the mean decreases toward $K/2 = 3$, which makes intuitive sense.
+
+What about a different value of $\mu$? Say, $\mu = 1/6$?
+
+```{r, cache=TRUE}
+K <- 6
+mu <- 1/6
+rho <- 0.01
+n <- 400000
+sigmaseq <- 10 ^ seq(-2, 3, length = 20)
+xbar <- rep(NA, length(sigmaseq))
+for (index in 1:length(xbar)) {
+  z <- rnorm(n = n, mean = 0, sd = sigmaseq[index])
+  simout_nbb <- qbetabinom(p = pnorm(z), size = K, mu = mu, rho = rho)
+  xbar[index] <- mean(simout_nbb)
+}
+
+qplot(log(sigmaseq, base = 10), xbar, xlab = "log (base 10) sd", ylab = "mean", geom = "line", main = "Mean of BB is 5") + theme_bw()
+```
+
+We see a mirror image.
+
+At $\mu = 1/2$, the mean stays around 3 (notice the scales on the Y-axis).
+
+```{r, cache=TRUE}
+K <- 6
+mu <- 3/6
+rho <- 0.01
+n <- 400000
+sigmaseq <- 10 ^ seq(-2, 3, length = 20)
+xbar <- rep(NA, length(sigmaseq))
+for (index in 1:length(xbar)) {
+  z <- rnorm(n = n, mean = 0, sd = sigmaseq[index])
+  simout_nbb <- qbetabinom(p = pnorm(z), size = K, mu = mu, rho = rho)
+  xbar[index] <- mean(simout_nbb)
+}
+
+qplot(log(sigmaseq, base = 10), xbar, xlab = "log (base 10) sd", ylab = "mean", geom = "line", main = "Mean of BB is 5") + theme_bw()
+```
+
+```{r}
+sessionInfo()
+```
+
