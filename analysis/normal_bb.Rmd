@@ -14,9 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 I explore properties of what I will call the normal-beta-binomial model. Specifically, this is a generative model defined by the two-step process:
 $$
 z \sim N(0, \sigma^2),\\
-y = F^{-1}(\Phi(z)|\alpha, \tau),
+y = F^{-1}(\Phi(z)|K, \mu, \tau),
 $$
-where $F^{-1}(\cdot | \alpha, \tau)$ is the quantile function of a beta-binomial random variable with mean $\alpha$ and overdispersion parameter $\tau$, and $\Phi(\cdot)$ is the *standard* normal CDF.
+where $F^{-1}(\cdot |K, \mu, \tau)$ is the quantile function of a beta-binomial random variable with size $K$, underlying beta mean $\mu$, and overdispersion parameter $\tau$, and $\Phi(\cdot)$ is the *standard* normal CDF.
 
 # Analysis
 
@@ -42,7 +42,7 @@ mean(simout_nbb) ## should be about 5
 ```
 
 
-What if we vary the SD. We don't still get $K\mu$.
+What if we vary the SD? We don't still get $K\mu$.
 ```{r, cache=TRUE}
 K <- 6
 mu <- 5/6
@@ -76,7 +76,7 @@ for (index in 1:length(xbar)) {
   xbar[index] <- mean(simout_nbb)
 }
 
-qplot(log(sigmaseq, base = 10), xbar, xlab = "log (base 10) sd", ylab = "mean", geom = "line", main = "Mean of BB is 5") + theme_bw()
+qplot(log(sigmaseq, base = 10), xbar, xlab = "log (base 10) sd", ylab = "mean", geom = "line", main = "Mean of BB is 1") + theme_bw()
 ```
 
 We see a mirror image.
@@ -96,7 +96,7 @@ for (index in 1:length(xbar)) {
   xbar[index] <- mean(simout_nbb)
 }
 
-qplot(log(sigmaseq, base = 10), xbar, xlab = "log (base 10) sd", ylab = "mean", geom = "line", main = "Mean of BB is 5") + theme_bw()
+qplot(log(sigmaseq, base = 10), xbar, xlab = "log (base 10) sd", ylab = "mean", geom = "line", main = "Mean of BB is 3") + theme_bw()
 ```
 
 ```{r}

@@ -314,8 +314,8 @@ div.tocify {
 <h1>Abstract</h1>
 <p>I explore properties of what I will call the normal-beta-binomial model. Specifically, this is a generative model defined by the two-step process: <span class="math display">\[
 z \sim N(0, \sigma^2),\\
-y = F^{-1}(\Phi(z)|\alpha, \tau),
-\]</span> where <span class="math inline">\(F^{-1}(\cdot | \alpha, \tau)\)</span> is the quantile function of a beta-binomial random variable with mean <span class="math inline">\(\alpha\)</span> and overdispersion parameter <span class="math inline">\(\tau\)</span>, and <span class="math inline">\(\Phi(\cdot)\)</span> is the <em>standard</em> normal CDF.</p>
+y = F^{-1}(\Phi(z)|K, \mu, \tau),
+\]</span> where <span class="math inline">\(F^{-1}(\cdot |K, \mu, \tau)\)</span> is the quantile function of a beta-binomial random variable with size <span class="math inline">\(K\)</span>, underlying beta mean <span class="math inline">\(\mu\)</span>, and overdispersion parameter <span class="math inline">\(\tau\)</span>, and <span class="math inline">\(\Phi(\cdot)\)</span> is the <em>standard</em> normal CDF.</p>
 </div>
 <div id="analysis" class="section level1">
 <h1>Analysis</h1>
@@ -345,8 +345,8 @@ theo_dist &lt;- dbetabinom(0:K, K, mu, rho, FALSE)
 qplot(emp_dist, theo_dist) + theme_bw() + geom_abline(lty = 2)</code></pre>
 <p><img src="normal_bb_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
 <pre class="r"><code>mean(simout_nbb) ## should be about 5</code></pre>
-<pre><code>## [1] 4.999</code></pre>
-<p>What if we vary the SD. We don’t still get <span class="math inline">\(K\mu\)</span>.</p>
+<pre><code>## [1] 5.002</code></pre>
+<p>What if we vary the SD? We don’t still get <span class="math inline">\(K\mu\)</span>.</p>
 <pre class="r"><code>K &lt;- 6
 mu &lt;- 5/6
 rho &lt;- 0.01
@@ -375,7 +375,7 @@ for (index in 1:length(xbar)) {
   xbar[index] &lt;- mean(simout_nbb)
 }
 
-qplot(log(sigmaseq, base = 10), xbar, xlab = &quot;log (base 10) sd&quot;, ylab = &quot;mean&quot;, geom = &quot;line&quot;, main = &quot;Mean of BB is 5&quot;) + theme_bw()</code></pre>
+qplot(log(sigmaseq, base = 10), xbar, xlab = &quot;log (base 10) sd&quot;, ylab = &quot;mean&quot;, geom = &quot;line&quot;, main = &quot;Mean of BB is 1&quot;) + theme_bw()</code></pre>
 <p><img src="normal_bb_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>We see a mirror image.</p>
 <p>At <span class="math inline">\(\mu = 1/2\)</span>, the mean stays around 3 (notice the scales on the Y-axis).</p>
@@ -391,7 +391,7 @@ for (index in 1:length(xbar)) {
   xbar[index] &lt;- mean(simout_nbb)
 }
 
-qplot(log(sigmaseq, base = 10), xbar, xlab = &quot;log (base 10) sd&quot;, ylab = &quot;mean&quot;, geom = &quot;line&quot;, main = &quot;Mean of BB is 5&quot;) + theme_bw()</code></pre>
+qplot(log(sigmaseq, base = 10), xbar, xlab = &quot;log (base 10) sd&quot;, ylab = &quot;mean&quot;, geom = &quot;line&quot;, main = &quot;Mean of BB is 3&quot;) + theme_bw()</code></pre>
 <p><img src="normal_bb_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.4.3 (2017-11-30)
