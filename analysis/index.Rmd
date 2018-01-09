@@ -21,3 +21,4 @@ output:
 * [Assuming hexaploid when tetraploid to uitdewilligen data results in lower objective value](uitdewilligen_k6.html)
 * [Adding correlation helps in mislabelings in Shirasawa data](shir_fix_corr.html)
 * [I am updating the correlation matrix incorrectly.](corr_mle.html) I don't know yet how much this matters.
+* [A non-1 variance biases the distribution away from $K\mu$. This would make the allele frequencies harder to interpret.](normal_bb.html)
