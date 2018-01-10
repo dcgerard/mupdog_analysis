@@ -1,0 +1,60 @@
+---
+title: "Explore Shirasawa Correlation More Carefully"
+author: "David Gerard"
+date: "January 10, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I take a look more closely at the Shirasawa correlation matrix.
+
+# Analysis
+
+```{r, message=FALSE, warning=FALSE}
+library(corrplot)
+library(tidyverse)
+mout <- readRDS("../output/shir_fit/shir_fit_nodiag1.RDS")
+R <- cov2cor(mout$cor_mat)
+```
+
+
+```{r, echo = FALSE, eval = FALSE}
+# The correlations between the parent and the offspring are different 
+# than the correlations between the offspring and the offspring. Though not by much (and can't believe that df/p-value).
+par <- R[1, -1]
+nonpar <- R[-1, -1][upper.tri(R[-1, -1])]
+t.test(par, nonpar)
+boxplot(par, nonpar, names = c("Parent", "No Parent"))
+```
+
+The genotype correlation looks as we would expect, with higher correlation of the parent with everyone else:
+```{r}
+genocor <- cor(t(mout$map_dosage))
+corrplot(genocor, method = "color", order = "hclust", diag = FALSE)
+qplot(genocor[upper.tri(genocor)], bins = 30) + theme_bw()
+data_frame(cor = genocor[1, -1], parent = TRUE) %>%
+  bind_rows(data_frame(cor = genocor[-1, -1][upper.tri(genocor[-1, -1])], parent = FALSE)) %>%
+  ggplot(mapping = aes(x = parent, y = cor)) +
+  geom_boxplot() +
+  theme_bw()
+```
+
+But this is not what `R` is estimating. Rather, we also must multiply the genotypes on the left by the centering matrix prior to calculating the correlation.
+```{r}
+n <- nrow(genocor)
+L <- diag(n) - matrix(1 / n, nrow = n, ncol = n)
+cordiff <- cor(t(L %*% mout$map_dosage))
+corrplot(cordiff, method = "color", order = "hclust", diag = FALSE)
+```
+
+What is the concordance here between `cordiff` and `R`?
+
+```{r}
+plot(R[upper.tri(R)], cordiff[upper.tri(cordiff)])
+```
+

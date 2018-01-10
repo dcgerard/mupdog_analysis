@@ -1,0 +1,33 @@
+---
+title: "uit_nodiag"
+author: "David Gerard"
+date: "January 10, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I fit the uitdewilligen dataset to the new version of mupdog that does not constrain the diagonal of R to be 1.
+
+See [here](uitdewilligen.html) for fitting while constraining the diagonal to be 1.
+
+# Analysis
+
+```{r}
+library(mupdog)
+mnocor <- readRDS("../output/uit_fit/fit_uit1.RDS")
+mout <- mupdog(refmat = mnocor$input$refmat, sizemat = mnocor$input$sizemat, ploidy = mnocor$input$ploidy, 
+               verbose = TRUE, num_core = 7,
+               control = list(obj_tol = 10^-5, itermax = 200))
+saveRDS(mout, "../output/uit_fit/fit_uit_nodiag")
+```
+
+
+```{r}
+sessionInfo()
+```
+

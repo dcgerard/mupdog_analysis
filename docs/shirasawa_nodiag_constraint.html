@@ -11,8 +11,9 @@
 
 <meta name="author" content="David Gerard" />
 
+<meta name="date" content="2018-01-10" />
 
-<title>Normal BB</title>
+<title>Fit Shirasawa Dataset without diagonal constraint</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -303,132 +304,68 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Normal BB</h1>
+<h1 class="title toc-ignore">Fit Shirasawa Dataset without diagonal constraint</h1>
 <h4 class="author"><em>David Gerard</em></h4>
-<h4 class="date"><em>January 9, 2018</em></h4>
+<h4 class="date"><em>January 10, 2018</em></h4>
 
 </div>
 
 
 <div id="abstract" class="section level1">
 <h1>Abstract</h1>
-<p>I explore properties of what I will call the normal-beta-binomial model. Specifically, this is a generative model defined by the two-step process: <span class="math display">\[
-z \sim N(0, \sigma^2),\\
-y = F^{-1}(\Phi(z)|K, \mu, \tau),
-\]</span> where <span class="math inline">\(F^{-1}(\cdot |K, \mu, \tau)\)</span> is the quantile function of a beta-binomial random variable with size <span class="math inline">\(K\)</span>, underlying beta mean <span class="math inline">\(\mu\)</span>, and overdispersion parameter <span class="math inline">\(\tau\)</span>, and <span class="math inline">\(\Phi(\cdot)\)</span> is the <em>standard</em> normal CDF.</p>
+<p>I modified mupdog to not constrain the corrlation matrix to have a diagonal of ones. Here, I will test out how it performs on the Shirasawa SNPs.</p>
 </div>
 <div id="analysis" class="section level1">
 <h1>Analysis</h1>
-<p>First, make sure that the normal copula model does indeed result in bb</p>
-<pre class="r"><code>library(mupdog)
-library(tidyverse)</code></pre>
-<pre><code>## -- Attaching packages ------- tidyverse 1.2.1 --</code></pre>
-<pre><code>## v ggplot2 2.2.1     v purrr   0.2.4
-## v tibble  1.3.4     v dplyr   0.7.4
-## v tidyr   0.7.2     v stringr 1.2.0
-## v readr   1.1.1     v forcats 0.2.0</code></pre>
-<pre><code>## -- Conflicts ---------- tidyverse_conflicts() --
-## x dplyr::filter() masks stats::filter()
-## x dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>K     &lt;- 6
-mu    &lt;- 5/6
-rho   &lt;- 0.01
-n     &lt;- 400000
-sigma &lt;- 1
+<p>Fit Shirasawa SNPs</p>
+<pre class="r"><code>library(tidyverse)
+library(mupdog)
+library(corrplot)</code></pre>
+<pre class="r"><code>refmat &lt;- as.matrix(read.csv(&quot;/home/david/Code/reproduce_genotyping/Output/shirasawa_snps/example_refcounts.csv&quot;, row.names = 1))
+sizemat &lt;- as.matrix(read.csv(&quot;/home/david/Code/reproduce_genotyping/Output/shirasawa_snps/example_readcounts.csv&quot;, row.names = 1))
+mout &lt;- mupdog::mupdog(refmat = refmat, sizemat = sizemat, ploidy = 6, verbose = TRUE, 
+                       control = list(obj_tol = 10^-5), num_core = 7)
+saveRDS(mout, file = &quot;../output/shir_fit/shir_fit_nodiag1.RDS&quot;)</code></pre>
+<pre class="r"><code>mout &lt;- readRDS(file = &quot;../output/shir_fit/shir_fit_nodiag1.RDS&quot;)</code></pre>
+<p>The diagonal of the estimated covariance matrix is always smaller than 1. This might be the model saying they are related.</p>
+<pre class="r"><code>qplot(diag(mout$cor_mat), bins = 30, 
+      main = &quot;histogram of diagonal estimates of covariance matrix&quot;) + 
+  theme_bw()</code></pre>
+<p><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>There appears to be no specific groups.</p>
+<pre class="r"><code>uR &lt;- cov2cor(mout$cor_mat)
+corrplot(uR, method = &quot;color&quot;, order = &quot;hclust&quot;)</code></pre>
+<p><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>The histogram of correlations (using <code>cov2cor</code>) is almost exactly centered at 0 and spread between -4 and 4.</p>
+<pre class="r"><code>qplot(uR[upper.tri(uR)], bins = 30) + theme_bw()</code></pre>
+<p><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Plots look pretty good:</p>
+<pre class="r"><code>set.seed(2)
+for (index in 1:20) {
+  pl &lt;- plot(mout, sample(1:1000, 1))
+  print(pl)  
+}</code></pre>
+<p><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-1.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-2.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-3.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-4.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-5.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-6.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-7.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-8.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-9.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-10.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-11.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-12.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-13.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-14.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-15.png" width="672" /></p>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
+<p><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-16.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-17.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-18.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-19.png" width="672" /><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-7-20.png" width="672" /></p>
+<p>Let’s see if the allele frequencies make sense:</p>
+<pre class="r"><code>qplot(mout$allele_freq, bins = 100) + theme_bw() +
+  geom_vline(xintercept = 0:6/6, lty = 2)</code></pre>
+<p><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>This is really cool. It is saying that the allele frequency is either 1/6 or 5/6. Shirasawa et al did screening to make sure that all of their SNP’s were did not have ratios beyond AAAAAa or Aaaaaa. Apparently there aren’t any monoallelic SNPs in these data.</p>
+<pre class="r"><code>emp_allele_freq &lt;- colMeans(mout$map_dosage) / 6
 
-z &lt;- rnorm(n = n, mean = 0, sd = sigma)
-simout_nbb &lt;- qbetabinom(p = pnorm(z), size = K, mu = mu, rho = rho)
-
-emp_dist &lt;- c(table(simout_nbb) / n)
-theo_dist &lt;- dbetabinom(0:K, K, mu, rho, FALSE)
-
-qplot(emp_dist, theo_dist) + theme_bw() + geom_abline(lty = 2)</code></pre>
-<p><img src="normal_bb_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
-<pre class="r"><code>mean(simout_nbb) ## should be about 5</code></pre>
-<pre><code>## [1] 5.002</code></pre>
-<p>What if we vary the SD? We don’t still get <span class="math inline">\(K\mu\)</span>.</p>
-<pre class="r"><code>K &lt;- 6
-mu &lt;- 5/6
-rho &lt;- 0.01
-n &lt;- 400000
-sigmaseq &lt;- 10 ^ seq(-2, 3, length = 20)
-xbar &lt;- rep(NA, length(sigmaseq))
-for (index in 1:length(xbar)) {
-  z &lt;- rnorm(n = n, mean = 0, sd = sigmaseq[index])
-  simout_nbb &lt;- qbetabinom(p = pnorm(z), size = K, mu = mu, rho = rho)
-  xbar[index] &lt;- mean(simout_nbb)
-}
-
-qplot(log(sigmaseq, base = 10), xbar, xlab = &quot;log (base 10) sd&quot;, ylab = &quot;mean&quot;, geom = &quot;line&quot;, main = &quot;Mean of BB is 5&quot;) + theme_bw()</code></pre>
-<p><img src="normal_bb_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<p>Interestingly, when you decrease the variance a little bit the mean goes up then goes back down to 5. When you increase the variance, the mean decreases toward <span class="math inline">\(K/2 = 3\)</span>, which makes intuitive sense.</p>
-<p>What about a different value of <span class="math inline">\(\mu\)</span>? Say, <span class="math inline">\(\mu = 1/6\)</span>?</p>
-<pre class="r"><code>K &lt;- 6
-mu &lt;- 1/6
-rho &lt;- 0.01
-n &lt;- 400000
-sigmaseq &lt;- 10 ^ seq(-2, 3, length = 20)
-xbar &lt;- rep(NA, length(sigmaseq))
-for (index in 1:length(xbar)) {
-  z &lt;- rnorm(n = n, mean = 0, sd = sigmaseq[index])
-  simout_nbb &lt;- qbetabinom(p = pnorm(z), size = K, mu = mu, rho = rho)
-  xbar[index] &lt;- mean(simout_nbb)
-}
-
-qplot(log(sigmaseq, base = 10), xbar, xlab = &quot;log (base 10) sd&quot;, ylab = &quot;mean&quot;, geom = &quot;line&quot;, main = &quot;Mean of BB is 1&quot;) + theme_bw()</code></pre>
-<p><img src="normal_bb_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
-<p>We see a mirror image.</p>
-<p>At <span class="math inline">\(\mu = 1/2\)</span>, the mean stays around 3 (notice the scales on the Y-axis).</p>
-<pre class="r"><code>K &lt;- 6
-mu &lt;- 3/6
-rho &lt;- 0.01
-n &lt;- 400000
-sigmaseq &lt;- 10 ^ seq(-2, 3, length = 20)
-xbar &lt;- rep(NA, length(sigmaseq))
-for (index in 1:length(xbar)) {
-  z &lt;- rnorm(n = n, mean = 0, sd = sigmaseq[index])
-  simout_nbb &lt;- qbetabinom(p = pnorm(z), size = K, mu = mu, rho = rho)
-  xbar[index] &lt;- mean(simout_nbb)
-}
-
-qplot(log(sigmaseq, base = 10), xbar, xlab = &quot;log (base 10) sd&quot;, ylab = &quot;mean&quot;, geom = &quot;line&quot;, main = &quot;Mean of BB is 3&quot;) + theme_bw()</code></pre>
-<p><img src="normal_bb_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>## R version 3.4.3 (2017-11-30)
-## Platform: x86_64-w64-mingw32/x64 (64-bit)
-## Running under: Windows 10 x64 (build 15063)
-## 
-## Matrix products: default
-## 
-## locale:
-## [1] LC_COLLATE=English_United States.1252 
-## [2] LC_CTYPE=English_United States.1252   
-## [3] LC_MONETARY=English_United States.1252
-## [4] LC_NUMERIC=C                          
-## [5] LC_TIME=English_United States.1252    
-## 
-## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
-## 
-## other attached packages:
-##  [1] forcats_0.2.0   stringr_1.2.0   dplyr_0.7.4     purrr_0.2.4    
-##  [5] readr_1.1.1     tidyr_0.7.2     tibble_1.3.4    ggplot2_2.2.1  
-##  [9] tidyverse_1.2.1 mupdog_0.0.1   
-## 
-## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.14     cellranger_1.1.0 compiler_3.4.3   plyr_1.8.4      
-##  [5] bindr_0.1        iterators_1.0.9  tools_3.4.3      digest_0.6.13   
-##  [9] lubridate_1.7.1  jsonlite_1.5     evaluate_0.10.1  nlme_3.1-131    
-## [13] gtable_0.2.0     lattice_0.20-35  pkgconfig_2.0.1  rlang_0.1.4     
-## [17] psych_1.7.8      foreach_1.4.4    cli_1.0.0        rstudioapi_0.7  
-## [21] yaml_2.1.16      parallel_3.4.3   haven_1.1.0      bindrcpp_0.2    
-## [25] xml2_1.1.1       httr_1.3.1       knitr_1.17       hms_0.4.0       
-## [29] rprojroot_1.3-1  grid_3.4.3       glue_1.2.0       R6_2.2.2        
-## [33] readxl_1.0.0     foreign_0.8-69   rmarkdown_1.8    modelr_0.1.1    
-## [37] reshape2_1.4.3   magrittr_1.5     backports_1.1.2  scales_0.5.0    
-## [41] codetools_0.2-15 htmltools_0.3.6  rvest_0.3.2      assertthat_0.2.0
-## [45] mnormt_1.5-5     colorspace_1.3-2 labeling_0.3     stringi_1.1.6   
-## [49] lazyeval_0.2.1   munsell_0.4.3    broom_0.4.3      crayon_1.3.4</code></pre>
+qplot(mout$allele_freq, emp_allele_freq) + theme_bw() +
+  geom_vline(xintercept = 0:6/6, lty = 2) +
+  geom_hline(yintercept = 0:6/6, lty = 2)</code></pre>
+<p><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Let’s look at the weird 0.75 allele-freq SNP (doesn’t look too bad).</p>
+<pre class="r"><code>weird_snp &lt;- which.min((mout$allele_freq - 0.75)^2)
+plot(mout, weird_snp)</code></pre>
+<p><img src="shirasawa_nodiag_constraint_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>The parent is the individual that got the tiny variance estimate. Which makes super sense — in these data they always have allele AAAAAa or Aaaaaa!</p>
+<pre class="r"><code>diag(mout$cor_mat)[1]</code></pre>
+<pre><code>## [1] 0.0131</code></pre>
 </div>
 
 <hr>
