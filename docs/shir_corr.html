@@ -317,6 +317,7 @@ div.tocify {
 <h1>Analysis</h1>
 <pre class="r"><code>library(corrplot)
 library(tidyverse)
+library(mupdog)
 mout &lt;- readRDS(&quot;../output/shir_fit/shir_fit_nodiag1.RDS&quot;)
 R &lt;- cov2cor(mout$cor_mat)</code></pre>
 <p>The genotype correlation looks as we would expect, with higher correlation of the parent with everyone else:</p>
@@ -340,6 +341,11 @@ corrplot(cordiff, method = &quot;color&quot;, order = &quot;hclust&quot;, diag =
 <p>What is the concordance here between <code>cordiff</code> and <code>R</code>?</p>
 <pre class="r"><code>plot(R[upper.tri(R)], cordiff[upper.tri(cordiff)])</code></pre>
 <p><img src="shir_corr_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>What if we do the same thing but with the posterior mean genotypes? It looks almost the exact same.</p>
+<pre class="r"><code>sout &lt;- summary(mout)
+cormeandiff &lt;- cor(t(L %*% sout$mean_dosage))
+plot(R[upper.tri(R)], cormeandiff[upper.tri(cormeandiff)])</code></pre>
+<p><img src="shir_corr_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 
 <hr>

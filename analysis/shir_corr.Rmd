@@ -18,6 +18,7 @@ I take a look more closely at the Shirasawa correlation matrix.
 ```{r, message=FALSE, warning=FALSE}
 library(corrplot)
 library(tidyverse)
+library(mupdog)
 mout <- readRDS("../output/shir_fit/shir_fit_nodiag1.RDS")
 R <- cov2cor(mout$cor_mat)
 ```
@@ -56,5 +57,13 @@ What is the concordance here between `cordiff` and `R`?
 
 ```{r}
 plot(R[upper.tri(R)], cordiff[upper.tri(cordiff)])
+```
+
+
+What if we do the same thing but with the posterior mean genotypes? It looks almost the exact same.
+```{r}
+sout <- summary(mout)
+cormeandiff <- cor(t(L %*% sout$mean_dosage))
+plot(R[upper.tri(R)], cormeandiff[upper.tri(cormeandiff)])
 ```
 
