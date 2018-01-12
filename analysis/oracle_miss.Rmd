@@ -52,13 +52,15 @@ errdat$miss_err <- miss_err
 ```
 
 Plot results. Red horizontal line is at a misclassification error rate of 0.05.
-```{r}
-ggplot(data = errdat, mapping = aes(x = n, y = miss_err)) +
+```{r, fig.height=30}
+ggplot(data = errdat, mapping = aes(x = n, y = miss_err, col = as.factor(bias))) +
   geom_line() +
   theme_bw() +
-  facet_grid(od ~ bias) +
+  facet_grid(od ~.) +
   theme(strip.background = element_rect(fill = "white")) +
-  geom_hline(yintercept = 0.05, col = "red", lty = 2)
+  geom_hline(yintercept = 0.05, col = "red", lty = 2) +
+  scale_color_discrete(name = "bias") +
+  ylab("Misclassification Error")
 ```
 
 

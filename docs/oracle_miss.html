@@ -345,12 +345,14 @@ for (index in 1:nrow(errdat)) {
 }
 errdat$miss_err &lt;- miss_err</code></pre>
 <p>Plot results. Red horizontal line is at a misclassification error rate of 0.05.</p>
-<pre class="r"><code>ggplot(data = errdat, mapping = aes(x = n, y = miss_err)) +
+<pre class="r"><code>ggplot(data = errdat, mapping = aes(x = n, y = miss_err, col = as.factor(bias))) +
   geom_line() +
   theme_bw() +
-  facet_grid(od ~ bias) +
+  facet_grid(od ~.) +
   theme(strip.background = element_rect(fill = &quot;white&quot;)) +
-  geom_hline(yintercept = 0.05, col = &quot;red&quot;, lty = 2)</code></pre>
+  geom_hline(yintercept = 0.05, col = &quot;red&quot;, lty = 2) +
+  scale_color_discrete(name = &quot;bias&quot;) +
+  ylab(&quot;Misclassification Error&quot;)</code></pre>
 <p><img src="oracle_miss_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 </div>
 <div id="conclusions" class="section level1">
