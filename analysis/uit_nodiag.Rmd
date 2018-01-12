@@ -17,13 +17,56 @@ See [here](uitdewilligen.html) for fitting while constraining the diagonal to be
 
 # Analysis
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(mupdog)
+library(tidyverse)
+library(corrplot)
+```
+
+
+```{r, eval = FALSE}
 mnocor <- readRDS("../output/uit_fit/fit_uit1.RDS")
 mout <- mupdog(refmat = mnocor$input$refmat, sizemat = mnocor$input$sizemat, ploidy = mnocor$input$ploidy, 
                verbose = TRUE, num_core = 7,
                control = list(obj_tol = 10^-5, itermax = 200))
-saveRDS(mout, "../output/uit_fit/fit_uit_nodiag")
+saveRDS(mout, "../output/uit_fit/fit_uit_nodiag.RDS")
+```
+
+
+```{r}
+mout_nodiag <- readRDS("../output/uit_fit/fit_uit_nodiag.RDS")
+mout_diag1  <- readRDS("../output/uit_fit/fit_uit1.RDS")
+```
+
+Look at the new covariance matrix. Centered a little below 1 with one weird individual. Possibley two groups of individuals.
+```{r}
+qplot(diag(mout_nodiag$cor_mat), bins = 30) + theme_bw()
+```
+
+Get similar correlation plots
+```{r}
+Rnodiag <- cov2cor(mout_nodiag$cor_mat)
+corrplot(Rnodiag, method = "color", order = "hclust", diag = FALSE, title = "Not constraining diagonal", tl.pos = "n")
+corrplot(mout_diag1$cor_mat, method = "color", order = "hclust", diag = FALSE, title = "Constraining diagonal", tl.pos = "n")
+```
+
+The clusters are still apparent, but less so in the Genetic correlation plot using the MAP dosage.
+```{r}
+genocor <- cor(t(mout_nodiag$map_dosage))
+corrplot(genocor, method = "color", order = "hclust", tl.pos = "n", title = "Correlation from MAP dosage")
+qplot(genocor[upper.tri(genocor)], bins = 30) + theme_bw()
+```
+
+```{r}
+qplot(Rnodiag[upper.tri(Rnodiag)], bins = 30) + theme_bw()
+```
+
+
+# PCA on mean dosage
+```{r}
+library(FactoMineR)
+sout <- summary(mout_nodiag)
+pout <- PCA(sout$mean_dosage[-4, ])
 ```
 
 

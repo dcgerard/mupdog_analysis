@@ -20,8 +20,8 @@
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -31,10 +31,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -227,6 +229,7 @@ $(document).ready(function () {
 <li><a href="normal_bb.html">A non-1 variance biases the distribution away from <span class="math inline">\(K\mu\)</span>. This would make the allele frequencies harder to interpret.</a></li>
 <li><a href="shirasawa_nodiag_constraint.html">Fit Shirasawa data without the covariance matrix constrained to be diagonal.</a> Can pick out the parent easily.</li>
 <li><a href="shir_corr.html">You can understand the negative correlations by the fact that we are first removing the allele frequencies at each locus before calculating this correlation</a></li>
+<li><a href="oracle_miss.html">Oracle misclassification error rates</a></li>
 </ul>
 
 <hr>

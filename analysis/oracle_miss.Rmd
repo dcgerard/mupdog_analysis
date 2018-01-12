@@ -1,0 +1,87 @@
+---
+title: "Oracle Misclassification Error Rates"
+author: "David Gerard"
+date: "January 12, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+The function `oracle_miss` in the `mupdog` package will calculate $E[1(\hat{y} \neq y)]$, where $1(\cdot)$ is the indicator function, $y$ is the true genotype, and $\hat{y}$ is the estimated genotype. This assumes perfect knowledge of all parameters in the model, and so is the oracle misclassification error rate. The expecation is taken over both $\hat{y}$ and $y$. Here, I vary the allele bias, overdispersion parameter, and sample size, to get a rough idea of the the read-depth needed to accurately genotype individuals.
+
+# Analysis
+
+Set up parameters. 
+```{r, message=FALSE, warning=FALSE}
+library(mupdog)
+library(tidyverse)
+bias_vec    <- c(0.5, 0.75, 0.9, 1)
+seq         <- 0.01
+od_vec      <- c(0, 0.001, 0.005, 0.01, 0.05, 0.1)
+n_vec       <- 0:300
+allele_freq <- 0.5
+ploidy      <- 6
+dist        <- dbinom(x = 0:ploidy, size = ploidy, 
+                      prob = allele_freq, log = FALSE)
+```
+
+Set up settings.
+```{r}
+errdat <- as_data_frame(expand.grid(bias = bias_vec, od = od_vec, n = n_vec))
+errdat$seq <- seq
+errdat$ploidy <- ploidy
+errdat$allele_freq <- allele_freq
+```
+
+Calculate oracle misclassification error rates.
+```{r}
+miss_err <- rep(NA, length = nrow(errdat))
+for (index in 1:nrow(errdat)) {
+  miss_err[index] <- oracle_miss(n = errdat$n[index], 
+                                 ploidy = errdat$ploidy[index], 
+                                 seq = errdat$seq[index],
+                                 bias = errdat$bias[index],
+                                 od = errdat$od[index],
+                                 dist = dist)
+}
+errdat$miss_err <- miss_err
+```
+
+Plot results. Red horizontal line is at a misclassification error rate of 0.05.
+```{r}
+ggplot(data = errdat, mapping = aes(x = n, y = miss_err)) +
+  geom_line() +
+  theme_bw() +
+  facet_grid(od ~ bias) +
+  theme(strip.background = element_rect(fill = "white")) +
+  geom_hline(yintercept = 0.05, col = "red", lty = 2)
+```
+
+
+
+# Conclusions
+
+Bias has a much lower affect on the misclassification error rate than I thought would be the case. For example, we can look at specific cases of `n` and `od` and see a much smaller bias only decreases the misclassification error rate by about 2 percent.
+```{r}
+filter(errdat, n == 100, od == 0)$miss_err
+filter(errdat, n == 100, od == 0.001)$miss_err
+filter(errdat, n == 100, od == 0.01)$miss_err
+```
+
+
+Even a tiny amount of overdispersion can have a huge affect on the oracle misclassification error rate. At 0.1 you can't do better than 50\%
+```{r}
+filter(errdat, n == 300, od == 0.1)$miss_err
+```
+
+In the updog paper, at an `od` of 0.1, we saw misclassification error rates of about 50\%, indicating that updog is near optimal.
+
+```{r}
+sessionInfo()
+```
+
+

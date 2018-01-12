@@ -24,3 +24,4 @@ output:
 * [A non-1 variance biases the distribution away from $K\mu$. This would make the allele frequencies harder to interpret.](normal_bb.html)
 * [Fit Shirasawa data without the covariance matrix constrained to be diagonal.](shirasawa_nodiag_constraint.html) Can pick out the parent easily.
 * [You can understand the negative correlations by the fact that we are first removing the allele frequencies at each locus before calculating this correlation](shir_corr.html)
+* [Oracle misclassification error rates](oracle_miss.html)
