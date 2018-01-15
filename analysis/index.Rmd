@@ -25,3 +25,4 @@ output:
 * [Fit Shirasawa data without the covariance matrix constrained to be diagonal.](shirasawa_nodiag_constraint.html) Can pick out the parent easily.
 * [You can understand the negative correlations by the fact that we are first removing the allele frequencies at each locus before calculating this correlation](shir_corr.html)
 * [Oracle misclassification error rates](oracle_miss.html)
+* [Oracle rates indicate that it's better to account for bias directly rather than use WASP (which decreases the sample size).](bias_or_remove.html)

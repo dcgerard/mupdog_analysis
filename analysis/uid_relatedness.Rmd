@@ -1,0 +1,75 @@
+---
+title: "Relatedness of Uitdewilligen Potatoes"
+author: "David Gerard"
+date: "January 13, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I see if we can extract the different potato groups from the estimated correlation matrix.
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(mupdog)
+mout <- readRDS("../output/uit_fit/fit_uit_nodiag.RDS")
+```
+
+```{r}
+supp <- read.csv("../output/uit_fit/uit_supp.csv")
+supp$id <- paste0(supp$Pool.ID, supp$Adapter.Index.ID)
+all(match(supp$id, row.names(mout$input$refmat)) == 1:84)
+```
+
+```{r}
+R <- cov2cor(mout$cor_mat[-51, -51])
+eout <- eigen(R)
+eout$values / sum(eout$values)
+
+pl <- qplot(eout$vectors[, 1], eout$vectors[, 2]) +
+  theme_bw() +
+  xlab("PC 1 (10.8%)") +
+  ylab("PC 2 (5.0%)") +
+  scale_color_discrete(name = "Potato Type")
+pdf(file = "../output/uit_fit/uit_pca.pdf", family = "Times",
+    colormodel = "cmyk", height = 3, width = 3)
+print(pl)
+dev.off()
+```
+
+```{r}
+library(corrplot)
+pdf(file = "../output/uit_fit/uit_corr.pdf", family = "Times", 
+    colormodel = "cmyk", height = 3, width = 3)
+corrplot(R, method = "color", order = "hclust", diag = FALSE, tl.pos = "n")
+dev.off()
+```
+
+
+```{r, message=FALSE}
+library(gridExtra)
+mout_nocorr <- readRDS("../output/uit_fit/fit_uit_nocorr_warmstart.RDS")
+```
+
+```{r}
+index <- which(mout$allele_freq < 0.8 & mout$allele_freq > 0.75 & mout$bias < 0.75)[307]
+pl1 <- plot(mout_nocorr, index) + ggtitle("Assuming Independence")
+pl2 <- plot(mout, index) + ggtitle("Modeling Correlation")
+pdf(file = "../output/uit_fit/uit_snp1.pdf", family = "Times", colormodel = "cmyk", height = 3, width = 8) 
+grid.arrange(pl1, pl2, ncol = 2)
+dev.off()
+```
+
+```{r}
+index <- which(mout$allele_freq < 0.9 & mout$allele_freq > 0.85 & mout$bias < 0.75)[310]
+pl1 <- plot(mout_nocorr, index) + ggtitle("Assuming Independence")
+pl2 <- plot(mout, index) + ggtitle("Modeling Correlation")
+pdf(file = "../output/uit_fit/uit_snp2.pdf", family = "Times", colormodel = "cmyk", height = 3, width = 8) 
+grid.arrange(pl1, pl2, ncol = 2)
+dev.off()
+```
+

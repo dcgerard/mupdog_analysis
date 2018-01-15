@@ -80,13 +80,27 @@ library(gridExtra)
 index <- 1
 mout_corr$bias[which_look[1]]
 mout$bias[which_look[1]]
-for (i in 1:10) {
+for (i in 4:6) {
   index <- which_look[i]
   pl1 <- plot(mout, index) + ggtitle("Assuming Independence")
   pl2 <- plot(mout_corr, index) + ggtitle("Allowing Correlation")
+  pdf(file = paste0("../output/uit_fit/uit_snp", i - 3, ".pdf"),
+      family = "Times", colormodel = "cmyk", height = 3, width = 8)
   grid.arrange(pl1, pl2, ncol = 2)
+  dev.off()
 }
 ```
+
+```{r}
+  index <- 12409
+  pl1 <- plot(mout, index) + ggtitle("Assuming Independence")
+  pl2 <- plot(mout_corr, index) + ggtitle("Allowing Correlation")
+  pdf(file = paste0("../output/uit_fit/uit_snp", 4, ".pdf"),
+      family = "Times", colormodel = "cmyk", height = 3, width = 8)
+  grid.arrange(pl1, pl2, ncol = 2)
+  dev.off()
+```
+
 
 
 

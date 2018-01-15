@@ -1,0 +1,92 @@
+---
+title: "Bias or Remove?"
+author: "David Gerard"
+date: "January 15, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I use the oracle misclassification error rate code to calculate whether it is better to account for bias or to remove the bias-causing alleles.
+
+# Analysis
+
+Suppose that $h$ is the ratio of the probability of a minor read mapping correctly to the probability of referance read mapping correctly. We could either (i) account for the bias directly or (ii) take the approach of [WASP](http://dx.doi.org/10.1038/nmeth.3582) and remove reads based on how they map using the alternative allele.
+
+Which is better?
+
+Via a back-of-the-envelope calculation, I think WASP will decrease the sample size by a multiplicative factor of 
+$$
+\frac{h}{\alpha + h(1 - \alpha)}
+$$
+
+Derivation:
+
+Suppose there are $n_0$ total reads that *should* map to the correct location. Suppose we have allele frequency $\alpha$ and bias $h$. Suppose that we always map $A$ correct (we can do this without loss of generality by just scaling $n_0$ accordingly). Then we observe $\alpha n_0$ A's and $h(1 - \alpha)n_0$ a's. Then we have the observed sample size is 
+$$
+n = \alpha n_0 + h(1 - \alpha)n_0 \\
+n_0 = \frac{n}{\alpha + h (1 - \alpha)}.
+$$
+
+If we do the WASP procedure, we still observe $h(1 - \alpha)n_0$ a's, but now we observe $h\alpha n_0$ A's as well. So that means the new sample size is
+$$
+h\alpha n_0 + h(1 - \alpha)n_0 \\
+= \frac{hn}{\alpha + h(1 - \alpha)}.
+$$
+
+```{r}
+library(mupdog)
+alpha <- 0.7
+ploidy <- 6
+dist <- dbinom(x = 0:ploidy, size = ploidy, prob = alpha, log = FALSE)
+hseq <- c(0.5, 0.75, 0.9, 1)
+odseq <- c(0, 0.001, 0.005, 0.01)
+nseq <- round(seq(20, 200, length = 100))
+dat <- expand.grid(h = hseq, n = nseq, od = odseq)
+dat$n_new <- round(dat$n * dat$h / (alpha + dat$h * (1 - alpha)))
+dat$h_new <- 1 ## completely removes bias
+seq <- 0.01
+err_wasp <- rep(NA, nrow(dat))
+err_me   <- rep(NA, nrow(dat))
+for (index in 1:nrow(dat)) {
+  err_me[index] <- oracle_miss(n = dat$n[index], ploidy = ploidy, 
+                                 seq = seq, bias = dat$h[index], 
+                                 od = dat$od[index], dist = dist)
+  err_wasp[index] <- oracle_miss(n = dat$n_new[index], ploidy = ploidy, 
+                        seq = seq, bias = dat$h_new[index], 
+                        od = dat$od[index], dist = dist)
+}
+dat$wasp   <- err_wasp
+dat$direct <- err_me
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+longdat <- gather(data = dat, key = "method", value = "error", wasp:direct)
+
+ggplot(data = longdat, mapping = aes(x = n, y = error, color = method)) +
+  geom_line() +
+  facet_grid(od ~ h) +
+  theme_bw()
+
+```
+
+Oracly, it's almost always better to directly model the bias.
+```{r}
+## Negative difference means direct has lower oracle rate.
+dat$diff <- dat$direct - dat$wasp
+ggplot(data = dat, mapping = aes(x = n, y = diff)) +
+  geom_line() +
+  facet_grid(od ~ h) +
+  theme_bw() +
+  geom_hline(yintercept = 0, lty = 2, col = 2) +
+  ggtitle("difference of oracle error rates") +
+  theme(strip.background = element_rect(fill = "white"))
+```
+
+
+
