@@ -44,8 +44,8 @@ alpha <- 0.7
 ploidy <- 6
 dist <- dbinom(x = 0:ploidy, size = ploidy, prob = alpha, log = FALSE)
 hseq <- c(0.5, 0.75, 0.9, 1)
-odseq <- c(0, 0.001, 0.005, 0.01)
-nseq <- round(seq(20, 200, length = 100))
+odseq <- c(0, 0.001, 0.005, 0.01, 0.02)
+nseq <- round(seq(20, 300, length = 100))
 dat <- expand.grid(h = hseq, n = nseq, od = odseq)
 dat$n_new <- round(dat$n * dat$h / (alpha + dat$h * (1 - alpha)))
 dat$h_new <- 1 ## completely removes bias
@@ -53,10 +53,10 @@ seq <- 0.01
 err_wasp <- rep(NA, nrow(dat))
 err_me   <- rep(NA, nrow(dat))
 for (index in 1:nrow(dat)) {
-  err_me[index] <- oracle_miss(n = dat$n[index], ploidy = ploidy, 
+  err_me[index] <- oracle_mis(n = dat$n[index], ploidy = ploidy, 
                                  seq = seq, bias = dat$h[index], 
                                  od = dat$od[index], dist = dist)
-  err_wasp[index] <- oracle_miss(n = dat$n_new[index], ploidy = ploidy, 
+  err_wasp[index] <- oracle_mis(n = dat$n_new[index], ploidy = ploidy, 
                         seq = seq, bias = dat$h_new[index], 
                         od = dat$od[index], dist = dist)
 }
@@ -75,7 +75,7 @@ ggplot(data = longdat, mapping = aes(x = n, y = error, color = method)) +
 
 ```
 
-Oracly, it's almost always better to directly model the bias.
+Oracly, it's better to use WASP in overdispersed SNPs and better to directly account for the bias in non-overdispersed SNPs. My guess is that this is because the SNPs bunch up if there is too much bias, and this is particularly bad if the SNPs are overdispersed. But with less bias they are less bunched up.
 ```{r}
 ## Negative difference means direct has lower oracle rate.
 dat$diff <- dat$direct - dat$wasp
@@ -88,5 +88,6 @@ ggplot(data = dat, mapping = aes(x = n, y = diff)) +
   theme(strip.background = element_rect(fill = "white"))
 ```
 
+In the Shirasawa dataset, most of the estimates of the bias were between 0.001 and 0.02.
 
 

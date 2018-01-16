@@ -25,8 +25,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -36,12 +36,10 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs) {
-  hljs.configure({languages: []});
-  hljs.initHighlightingOnLoad();
-  if (document.readyState && document.readyState === "complete") {
-    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
-  }
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
 }
 </script>
 
@@ -336,8 +334,8 @@ alpha &lt;- 0.7
 ploidy &lt;- 6
 dist &lt;- dbinom(x = 0:ploidy, size = ploidy, prob = alpha, log = FALSE)
 hseq &lt;- c(0.5, 0.75, 0.9, 1)
-odseq &lt;- c(0, 0.001, 0.005, 0.01)
-nseq &lt;- round(seq(20, 200, length = 100))
+odseq &lt;- c(0, 0.001, 0.005, 0.01, 0.02)
+nseq &lt;- round(seq(20, 300, length = 100))
 dat &lt;- expand.grid(h = hseq, n = nseq, od = odseq)
 dat$n_new &lt;- round(dat$n * dat$h / (alpha + dat$h * (1 - alpha)))
 dat$h_new &lt;- 1 ## completely removes bias
@@ -345,10 +343,10 @@ seq &lt;- 0.01
 err_wasp &lt;- rep(NA, nrow(dat))
 err_me   &lt;- rep(NA, nrow(dat))
 for (index in 1:nrow(dat)) {
-  err_me[index] &lt;- oracle_miss(n = dat$n[index], ploidy = ploidy, 
+  err_me[index] &lt;- oracle_mis(n = dat$n[index], ploidy = ploidy, 
                                  seq = seq, bias = dat$h[index], 
                                  od = dat$od[index], dist = dist)
-  err_wasp[index] &lt;- oracle_miss(n = dat$n_new[index], ploidy = ploidy, 
+  err_wasp[index] &lt;- oracle_mis(n = dat$n_new[index], ploidy = ploidy, 
                         seq = seq, bias = dat$h_new[index], 
                         od = dat$od[index], dist = dist)
 }
@@ -362,7 +360,7 @@ ggplot(data = longdat, mapping = aes(x = n, y = error, color = method)) +
   facet_grid(od ~ h) +
   theme_bw()</code></pre>
 <p><img src="bias_or_remove_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<p>Oracly, it’s almost always better to directly model the bias.</p>
+<p>Oracly, it’s better to use WASP in overdispersed SNPs and better to directly account for the bias in non-overdispersed SNPs. My guess is that this is because the SNPs bunch up if there is too much bias, and this is particularly bad if the SNPs are overdispersed. But with less bias they are less bunched up.</p>
 <pre class="r"><code>## Negative difference means direct has lower oracle rate.
 dat$diff &lt;- dat$direct - dat$wasp
 ggplot(data = dat, mapping = aes(x = n, y = diff)) +
@@ -373,6 +371,7 @@ ggplot(data = dat, mapping = aes(x = n, y = diff)) +
   ggtitle(&quot;difference of oracle error rates&quot;) +
   theme(strip.background = element_rect(fill = &quot;white&quot;))</code></pre>
 <p><img src="bias_or_remove_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>In the Shirasawa dataset, most of the estimates of the bias were between 0.001 and 0.02.</p>
 </div>
 
 <hr>
