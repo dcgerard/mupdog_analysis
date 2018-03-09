@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="David Gerard" />
+
+
+<title>Check Gaussian Binomial Dist</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mupdog</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dcgerard/mupdog">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Check Gaussian Binomial Dist</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>March 8, 2018</em></h4>
+
+</div>
+
+
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+In <code>mupdog</code> we are using a Gaussian-Binomial distribution to estimate the distribution of genotypes.
+<span class="math display">\[\begin{align*}
+z &amp;\sim N(0, \sigma^2)\\
+y &amp;= F^{-1}(\Phi(z)|K, \alpha),
+\end{align*}\]</span>
+<p>where <span class="math inline">\(F^{-1}(\cdot|K,\alpha)\)</span> is the quantile function of a binomial distribution with size <span class="math inline">\(K\)</span> and success probability <span class="math inline">\(\alpha\)</span>, and <span class="math inline">\(\Phi(\cdot)\)</span> is the CDF of a standard normal.</p>
+<p>Let’s see how good this model can possibly be under model mispecification.</p>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<p>Since we are estimating parameters by maximum likelihood, as we get more individuals the estimate of the Gaussian-Binomial distribution will converge to that which is closes to the true distribution in terms of Kullback-Leibler divergence. I made the function <code>kl_opt</code> in <code>mupdog</code> to find this minimizer for any provided distribution <code>dist</code>.</p>
+<p>Let’s suppose that the individuals are actually all siblings, let’s compare the resulting distribution across a range of genotypes.</p>
+<pre class="r"><code>ploidy &lt;- 6
+qarray &lt;- updog::get_q_array(ploidy)</code></pre>
+<div id="parental-genotypes-1-and-2" class="section level2">
+<h2>Parental genotypes = 1 and 2</h2>
+<p>Let’s say the parents have genotype Aaaaaa and AAaaaaa</p>
+<pre class="r"><code>dist &lt;- qarray[2, 3, ]
+klout &lt;- mupdog::kl_opt(dist = dist, ploidy = ploidy)</code></pre>
+<p>The optimal values are</p>
+<pre class="r"><code>klout$sigma2</code></pre>
+<pre><code>## [1] 0.5057</code></pre>
+<pre class="r"><code>klout$alpha</code></pre>
+<pre><code>## [1] 0.2579</code></pre>
+<p>The value of <span class="math inline">\(\alpha\)</span> is close to the mean of 0.25.</p>
+<p>The distributions looks pretty close! The binomial looks a lot worse.</p>
+<pre class="r"><code>library(tidyverse)
+library(ggthemes)
+bindist &lt;- dbinom(x = 0:ploidy, size = ploidy, prob = sum(dist * (0:ploidy)) / ploidy)
+data_frame(dosage = 0:ploidy, true = dist, approximation = klout$dist,
+           binomial = bindist) %&gt;%
+  gather(key = &quot;distribution&quot;, value = &quot;probability&quot;, 2:4) -&gt;
+  dfdat
+dfdat$dosage[dfdat$distribution == &quot;approximation&quot;] &lt;- dfdat$dosage[dfdat$distribution == &quot;approximation&quot;] + 0.1
+dfdat$dosage[dfdat$distribution == &quot;binomial&quot;] &lt;- dfdat$dosage[dfdat$distribution == &quot;binomial&quot;] + 0.2
+ggplot(dfdat, mapping = aes(x = dosage, xend = dosage, y = 0, yend = probability, lty = distribution,
+                            color = distribution)) +
+  geom_segment() +
+  theme_bw() +
+  ylab(&quot;probability&quot;) +
+  scale_color_colorblind()</code></pre>
+<p><img src="kl_div_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+<div id="parents-of-a-2-2" class="section level2">
+<h2>Parents of a 2, 2</h2>
+<pre class="r"><code>dist &lt;- qarray[3, 3, ]
+klout &lt;- mupdog::kl_opt(dist = dist, ploidy = ploidy)</code></pre>
+<p>The optimal values are</p>
+<pre class="r"><code>klout$sigma2</code></pre>
+<pre><code>## [1] 0.5465</code></pre>
+<pre class="r"><code>klout$alpha</code></pre>
+<pre><code>## [1] 0.3381</code></pre>
+<p>The value of <span class="math inline">\(\alpha\)</span> is close to the mean of 0.3333.</p>
+<p>The distributions looks pretty close! The binomial looks a lot worse.</p>
+<pre class="r"><code>library(tidyverse)
+library(ggthemes)
+bindist &lt;- dbinom(x = 0:ploidy, size = ploidy, prob = sum(dist * (0:ploidy)) / ploidy)
+data_frame(dosage = 0:ploidy, true = dist, approximation = klout$dist,
+           binomial = bindist) %&gt;%
+  gather(key = &quot;distribution&quot;, value = &quot;probability&quot;, 2:4) -&gt;
+  dfdat
+dfdat$dosage[dfdat$distribution == &quot;approximation&quot;] &lt;- dfdat$dosage[dfdat$distribution == &quot;approximation&quot;] + 0.1
+dfdat$dosage[dfdat$distribution == &quot;binomial&quot;] &lt;- dfdat$dosage[dfdat$distribution == &quot;binomial&quot;] + 0.2
+ggplot(dfdat, mapping = aes(x = dosage, xend = dosage, y = 0, yend = probability, lty = distribution,
+                            color = distribution)) +
+  geom_segment() +
+  theme_bw() +
+  ylab(&quot;probability&quot;) +
+  scale_color_colorblind()</code></pre>
+<p><img src="kl_div_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>
+<div id="iterate-through-all-possible-parents" class="section level2">
+<h2>Iterate through all possible parents</h2>
+<pre class="r"><code>sim_mat &lt;- matrix(NA, nrow = (ploidy + 1) * (ploidy + 2) / 2, ncol = 5)
+true_list &lt;- list()
+approx_list &lt;- list()
+index &lt;- 1
+for (i in 0:ploidy) {
+  for (j in i :ploidy) {
+    dist &lt;- qarray[i + 1, j + 1, ]
+    klout &lt;- mupdog::kl_opt(dist = dist, ploidy = ploidy)
+    sim_mat[index, 1] &lt;- i
+    sim_mat[index, 2] &lt;- j
+    sim_mat[index, 3] &lt;- klout$sigma2
+    sim_mat[index, 4] &lt;- klout$alpha
+    sim_mat[index, 5] &lt;- sum((0:ploidy) * dist / ploidy)
+    true_list[[index]] &lt;- dist
+    approx_list[[index]] &lt;- klout$dist
+    
+    dist_df &lt;- data_frame(dosage = 0:ploidy, true = dist, approximation = klout$dist) %&gt;%
+      gather(key = &quot;distribution&quot;, value = &quot;probability&quot;, 2:3)
+      dist_df$dosage[dist_df$distribution == &quot;approximation&quot;] &lt;- dist_df$dosage[dist_df$distribution == &quot;approximation&quot;] + 0.2
+      dist_df$ij &lt;- paste0(&quot;(&quot;, i, &quot;,&quot;, j, &quot;)&quot;)
+    
+    if (i == 0 &amp; j == 0) {
+      dist_tot &lt;- dist_df
+    } else {
+      dist_tot &lt;- bind_rows(dist_tot, dist_df)
+    }
+    index &lt;- index + 1
+  }
+}
+sim_df &lt;- as_data_frame(sim_mat)
+names(sim_df) &lt;- c(&quot;i&quot;, &quot;j&quot;, &quot;sigma2&quot;, &quot;alpha&quot;, &quot;true_mean&quot;)</code></pre>
+<pre class="r"><code>ggplot(dist_tot, mapping = aes(x = dosage, xend = dosage, y = 0, yend = probability, lty = distribution,
+                            color = distribution)) +
+  geom_segment() +
+  theme_bw() +
+  ylab(&quot;probability&quot;) +
+  scale_color_colorblind() +
+  facet_wrap(~ij, ncol = 2) +
+  theme(strip.background = element_rect(fill = &quot;white&quot;))</code></pre>
+<p><img src="kl_div_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+</div>
+<div id="different-sigma" class="section level1">
+<h1>Different Sigma</h1>
+<p>However, we generally only have one sigma for each individual shared across all SNPs. So we can’t have it be so flexible.</p>
+<pre class="r"><code>hist(sim_df$sigma2)</code></pre>
+<p><img src="kl_div_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>mean(sim_df$sigma2)</code></pre>
+<pre><code>## [1] 0.3947</code></pre>
+<p>Let’s see how they all look when we fix <span class="math inline">\(\sigma^2\)</span> to be 0.4 and we let <span class="math inline">\(\alpha\)</span> be the mean of the true distribution.</p>
+<p>It looks OK, but there are some combinations that don’t look so good.</p>
+<pre class="r"><code>sigma2 &lt;- 0.4
+for (i in 0:ploidy) {
+  for (j in i:ploidy) {
+    dist &lt;- qarray[i + 1, j + 1, ]
+    alpha &lt;- sum(dist * (0:ploidy)) / ploidy
+    approx &lt;- c(mupdog:::compute_all_post_prob(ploidy = ploidy, 
+                                      mu = matrix(data = 0, nrow = 1, ncol = 1), 
+                                      sigma2 = matrix(data = sigma2, nrow = 1, ncol = 1), 
+                                      alpha = alpha, rho = 0))
+    
+    dist_df &lt;- data_frame(dosage = 0:ploidy, true = dist, approximation = approx) %&gt;%
+      gather(key = &quot;distribution&quot;, value = &quot;probability&quot;, 2:3)
+      dist_df$dosage[dist_df$distribution == &quot;approximation&quot;] &lt;- dist_df$dosage[dist_df$distribution == &quot;approximation&quot;] + 0.2
+      dist_df$ij &lt;- paste0(&quot;(&quot;, i, &quot;,&quot;, j, &quot;)&quot;)
+      dist_df$alpha &lt;- alpha
+      dist_df$sigma2 &lt;- sigma2
+      
+    if (i == 0 &amp; j == 0) {
+      dist_tot &lt;- dist_df
+    } else {
+      dist_tot &lt;- bind_rows(dist_tot, dist_df)
+    }
+  }
+}</code></pre>
+<pre class="r"><code>ggplot(dist_tot, mapping = aes(x = dosage, xend = dosage, y = 0, yend = probability, lty = distribution,
+                            color = distribution)) +
+  geom_segment() +
+  theme_bw() +
+  ylab(&quot;probability&quot;) +
+  scale_color_colorblind() +
+  facet_wrap(~ij, ncol = 2) +
+  theme(strip.background = element_rect(fill = &quot;white&quot;))</code></pre>
+<p><img src="kl_div_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
