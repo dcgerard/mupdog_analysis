@@ -26,3 +26,6 @@ output:
 * [You can understand the negative correlations by the fact that we are first removing the allele frequencies at each locus before calculating this correlation](shir_corr.html)
 * [Oracle misclassification error rates](oracle_miss.html)
 * [Oracle rates indicate that it's better to account for bias directly rather than use WASP (which decreases the sample size).](bias_or_remove.html)
+
+# Looking at the `mupdog` distribution
+* [The Gaussian Binomial can mimic the distribution of a convolution of two hypergeometrics in most cases, but it doesn't do as well when the same variance needs to be shared across loci](kl_div.html)
