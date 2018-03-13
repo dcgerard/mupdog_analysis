@@ -1,0 +1,186 @@
+---
+title: "updog vs flexdog"
+author: "David Gerard"
+date: "March 13, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+This is to prove that `updog` with option `model = "hw"` is the same as `flexdog` with option `model = "hw"`.
+
+# Analysis
+```{r, message=FALSE}
+library(updog)
+library(mupdog)
+library(tidyverse)
+```
+
+## SNP 1
+```{r}
+data("snpdat")
+ploidy  <- 6
+snpdat %>% 
+  filter(snp == "SNP1") ->
+  smalldat
+refvec  <- smalldat$counts
+refvec  <- refvec[!is.na(refvec)]
+sizevec <- smalldat$size
+sizevec <- sizevec[!is.na(sizevec)]
+```
+
+Fit both `updog` and `flexdog` with the HW options.
+```{r}
+uout <- updog_vanilla(ocounts        = refvec, 
+                      osize          = sizevec, 
+                      ploidy         = ploidy, 
+                      update_outprop = FALSE, 
+                      out_prop       = 0, 
+                      model          = "hw", 
+                      seq_error_mean = -4.7, 
+                      seq_error_sd   = 1, 
+                      bias_val_mean  = 0, 
+                      bias_val_sd    = 0.7)
+
+fout <- flexdog(refvec    = refvec, 
+                sizevec   = sizevec, 
+                ploidy    = ploidy, 
+                model     = "hw",
+                verbose   = FALSE, 
+                mean_bias = 0,
+                var_bias  = 0.7^2, 
+                mean_seq  = -4.7, 
+                var_seq   = 1,
+                tol       = 10^-5)
+```
+
+Estimates are nearly exactly the same!
+```{r}
+all(fout$geno == uout$ogeno)
+fout$bias_val
+uout$bias_val
+
+fout$od_param
+uout$od_param
+
+fout$seq_error
+uout$seq_error
+
+fout$par$alpha
+uout$allele_freq
+```
+
+## SNP 2
+
+```{r}
+data("snpdat")
+ploidy  <- 6
+snpdat %>% 
+  filter(snp == "SNP2") ->
+  smalldat
+refvec  <- smalldat$counts
+refvec  <- refvec[!is.na(refvec)]
+sizevec <- smalldat$size
+sizevec <- sizevec[!is.na(sizevec)]
+```
+
+Fit both `updog` and `flexdog` with the HW options.
+```{r}
+uout <- updog_vanilla(ocounts        = refvec, 
+                      osize          = sizevec, 
+                      ploidy         = ploidy, 
+                      update_outprop = FALSE, 
+                      out_prop       = 0, 
+                      model          = "hw", 
+                      seq_error_mean = -4.7, 
+                      seq_error_sd   = 1, 
+                      bias_val_mean  = 0, 
+                      bias_val_sd    = 0.7)
+
+fout <- flexdog(refvec    = refvec, 
+                sizevec   = sizevec, 
+                ploidy    = ploidy, 
+                model     = "hw",
+                verbose   = FALSE, 
+                mean_bias = 0,
+                var_bias  = 0.7^2, 
+                mean_seq  = -4.7, 
+                var_seq   = 1,
+                tol       = 10^-5)
+```
+
+Estimates are nearly exactly the same!
+```{r}
+all(fout$geno == uout$ogeno)
+fout$bias_val
+uout$bias_val
+
+fout$od_param
+uout$od_param
+
+fout$seq_error
+uout$seq_error
+
+fout$par$alpha
+uout$allele_freq
+```
+
+## SNP 3
+
+```{r}
+data("snpdat")
+ploidy  <- 6
+snpdat %>% 
+  filter(snp == "SNP3") ->
+  smalldat
+refvec  <- smalldat$counts
+refvec  <- refvec[!is.na(refvec)]
+sizevec <- smalldat$size
+sizevec <- sizevec[!is.na(sizevec)]
+```
+
+Fit both `updog` and `flexdog` with the HW options.
+```{r}
+uout <- updog_vanilla(ocounts        = refvec, 
+                      osize          = sizevec, 
+                      ploidy         = ploidy, 
+                      update_outprop = FALSE, 
+                      out_prop       = 0, 
+                      model          = "hw", 
+                      seq_error_mean = -4.7, 
+                      seq_error_sd   = 1, 
+                      bias_val_mean  = 0, 
+                      bias_val_sd    = 0.7)
+
+fout <- flexdog(refvec    = refvec, 
+                sizevec   = sizevec, 
+                ploidy    = ploidy, 
+                model     = "hw",
+                verbose   = FALSE, 
+                mean_bias = 0,
+                var_bias  = 0.7^2, 
+                mean_seq  = -4.7, 
+                var_seq   = 1,
+                tol       = 10^-5)
+```
+
+Estimates are nearly exactly the same!
+```{r}
+all(fout$geno == uout$ogeno)
+fout$bias_val
+uout$bias_val
+
+fout$od_param
+uout$od_param
+
+fout$seq_error
+uout$seq_error
+
+fout$par$alpha
+uout$allele_freq
+```
+

@@ -32,3 +32,4 @@ output:
 
 # Flexdog
 * [`mupdog` works as well or better than `flexdog` in every SNP I try in the Shirasawa dataset](flexdog_try1.html). Note that `mupdog` is technically a mispecified model whereas `flexdog` is technically correctly specified (because the genotype distribution is unimodal). The problem seems to be that the bias parameter is estimated unstably. We need a better way to estimate it. Some sort of adaptive regularization?
+* [`flexdog` with option `model = "hw"` is same as `updog` with option `model = "hw"`](flexdog_v_updog.html).
