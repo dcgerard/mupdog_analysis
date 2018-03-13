@@ -20,8 +20,8 @@
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/textmate.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -31,10 +31,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -234,6 +236,12 @@ $(document).ready(function () {
 <h1>Looking at the <code>mupdog</code> distribution</h1>
 <ul>
 <li><a href="kl_div.html">The Gaussian Binomial can mimic the distribution of a convolution of two hypergeometrics in most cases, but it doesn’t do as well when the same variance needs to be shared across loci</a></li>
+</ul>
+</div>
+<div id="flexdog" class="section level1">
+<h1>Flexdog</h1>
+<ul>
+<li><a href="flexdog_try1.html"><code>mupdog</code> works as well or better than <code>flexdog</code> in every SNP I try in the Shirasawa dataset</a>. Note that <code>mupdog</code> is technically a mispecified model whereas <code>flexdog</code> is technically correctly specified (because the genotype distribution is unimodal). The problem seems to be that the bias parameter is estimated unstably. We need a better way to estimate it. Some sort of adaptive regularization?</li>
 </ul>
 </div>
 

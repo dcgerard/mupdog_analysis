@@ -1,0 +1,147 @@
+---
+title: "FIrst Try at Flexdog"
+author: "David Gerard"
+date: "March 13, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Here, I try out `flexdog` for the first time. I then compare the fits to that of `mupdog`.
+
+# Analysis
+
+First, I read in the mupdog fit.
+
+```{r, message=FALSE}
+library(mupdog)
+library(tidyverse)
+mout <- readRDS("../output/shir_fit/shir_fit_nodiag1.RDS")
+```
+
+Now I fit `flexdog` on the first few SNPs.
+
+## SNP 1
+
+Extract SNP1 data.
+```{r, cache=TRUE}
+refvec  <- mout$input$refmat[, 1]
+sizevec <- mout$input$sizemat[, 1]
+ploidy  <- mout$input$ploidy
+plot(mout, 1) +
+  ggtitle("mupdog fit")
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash")
+plot(aout)  +
+    ggtitle("flexdog fit")
+plot(aout$gene_dist, type = "h", main = "Genotype Distribution", lwd = 4)
+```
+
+
+
+## SNP 2
+```{r, cache=TRUE}
+refvec  <- mout$input$refmat[, 2]
+sizevec <- mout$input$sizemat[, 2]
+refvec  <- refvec[!is.na(refvec)]
+sizevec <- sizevec[!is.na(sizevec)]
+plot(mout, 2) +
+  ggtitle("mupdog fit")
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash")
+plot(aout) +
+    ggtitle("flexdog fit")
+plot(aout$gene_dist, type = "h", main = "Genotype Distribution", lwd = 4)
+```
+
+
+The estimate for the bias is very unstable. We probably need more regularization on the bias parameter.
+
+```{r, cache = TRUE}
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash",
+                var_bias = 0.01)
+plot(aout) +
+  ggtitle("flexdog fit var_bias = 0.01")
+plot(aout$gene_dist, type = "h", main = "Genotype Distribution", lwd = 4)
+```
+
+So, this tells me for `flexdog`, we should estimate `var_bias` adaptively, rather than setting it.
+
+## SNP 3
+```{r, cache=TRUE}
+refvec  <- mout$input$refmat[, 3]
+sizevec <- mout$input$sizemat[, 3]
+refvec  <- refvec[!is.na(refvec)]
+sizevec <- sizevec[!is.na(sizevec)]
+plot(mout, 3) +
+  ggtitle("mupdog fit")
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash")
+plot(aout) +
+    ggtitle("flexdog fit")
+plot(aout$gene_dist, type = "h", main = "Genotype Distribution", lwd = 4)
+```
+
+Again, let's increase the regularization on the bias.
+```{r, cache = TRUE}
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash",
+                var_bias = 0.01)
+plot(aout) +
+  ggtitle("flexdog fit var_bias = 0.01")
+plot(aout$gene_dist, type = "h", main = "Genotype Distribution", lwd = 4)
+```
+
+## SNP 4
+```{r, cache=TRUE}
+refvec  <- mout$input$refmat[, 4]
+sizevec <- mout$input$sizemat[, 4]
+refvec  <- refvec[!is.na(refvec)]
+sizevec <- sizevec[!is.na(sizevec)]
+plot(mout, 4) +
+  ggtitle("mupdog fit")
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash")
+plot(aout) +
+    ggtitle("flexdog fit")
+plot(aout$gene_dist, type = "h", main = "Genotype Distribution", lwd = 4)
+```
+
+
+## SNP 5
+```{r, cache=TRUE}
+refvec  <- mout$input$refmat[, 5]
+sizevec <- mout$input$sizemat[, 5]
+refvec  <- refvec[!is.na(refvec)]
+sizevec <- sizevec[!is.na(sizevec)]
+plot(mout, 5) +
+  ggtitle("mupdog fit")
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash")
+plot(aout) +
+    ggtitle("flexdog fit")
+plot(aout$gene_dist, type = "h", main = "Genotype Distribution", lwd = 4)
+```
+
+
+
+
+## High Bias SNP
+```{r, cache=TRUE}
+refvec  <- mout$input$refmat[, 152]
+sizevec <- mout$input$sizemat[, 152]
+refvec  <- refvec[!is.na(refvec)]
+sizevec <- sizevec[!is.na(sizevec)]
+plot(mout, 152) +
+  ggtitle("mupdog fit")
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash")
+plot(aout) +
+    ggtitle("flexdog fit")
+plot(aout$gene_dist, type = "h", main = "Genotype Distribution", lwd = 4)
+```
