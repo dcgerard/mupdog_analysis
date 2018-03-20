@@ -35,3 +35,4 @@ output:
 * [`flexdog` with option `model = "hw"` is same as `updog` with option `model = "hw"`](flexdog_v_updog.html).
 * [`flexdog` is slightly faster than `updog`](flex_v_up_speed.html)
 * [Simple EM is faster than CVXR in unimodal update](compare_ash_cvxr.html)
+* [Compare CVXR and EM implementations of flexdog](flexdog_try2.html)

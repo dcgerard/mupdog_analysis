@@ -1,0 +1,61 @@
+---
+title: "Try out Sped Up Flexdog"
+author: "David Gerard"
+date: "March 20, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I try out the `ash` version of `flexdog` after giving it its speedup makeover.
+
+# Analysis
+```{r, message=FALSE}
+library(mupdog)
+library(tidyverse)
+mout <- readRDS("../output/shir_fit/shir_fit_nodiag1.RDS")
+```
+
+## SNP 1
+
+Extract SNP1 data.
+```{r, cache=TRUE}
+index <- 3
+refvec  <- mout$input$refmat[, index]
+sizevec <- mout$input$sizemat[, index]
+ploidy  <- mout$input$ploidy
+plot(mout, index) +
+  ggtitle("mupdog fit")
+ctime <- system.time({
+  cout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash", 
+                use_cvxr = TRUE)
+})
+atime <- system.time({
+  aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "ash", 
+                use_cvxr = FALSE)
+})
+ctime["elapsed"]
+atime["elapsed"]
+```
+
+It's all the same
+```{r}
+plot(cout$postmean, aout$postmean)
+abline(0, 1)
+cout$bias
+aout$bias
+cout$prop_mis
+aout$prop_mis
+cout$llike
+aout$llike
+cout$seq
+aout$seq
+cout$od
+aout$od
+```
