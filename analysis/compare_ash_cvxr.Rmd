@@ -17,7 +17,7 @@ Here, I compare CVXR to a weighted version of the `ashr` EM algorithm that I cod
 
 # Analysis
 ```{r}
-set.seed(1)
+set.seed(11)
 library(CVXR)
 ```
 
@@ -80,23 +80,32 @@ pi_init <- pi_init / sum(pi_init)
 eout <- em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)
 ```
 
+# EM implemented in mupdog
+```{r}
+library(mupdog)
+mout <- mupdog:::uni_em(weight_vec = weight_vec, lmat = inner_weights, pi_init = pi_init, itermax = 200, obj_tol = 10^-4)
+```
+
+
 # Estimates are the same!
 
 ```{r}
 plot(eout$pivec, type = "h", main = "em")
 plot(pivec, type = "h", main = "CVXR")
+plot(mout, type = "h", main = "C++ EM")
 ```
 
-# Naive EM in R is 5 times faster!
+# Speed Comparisons
 
 ```{r}
 microbenchmark::microbenchmark(
   cvxr_fun(weight_vec = weight_vec, inner_weights = inner_weights, ploidy = ploidy),
-  em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)
+  em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init),
+  mupdog:::uni_em(weight_vec = weight_vec, lmat = inner_weights, pi_init = pi_init, itermax = 200, obj_tol = 10^-4)
 )
 ```
 
-
+The C++ version of the EM algorithm is about 750 times faster than using CVXR!
 
 
 

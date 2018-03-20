@@ -318,7 +318,7 @@ div.tocify {
 </div>
 <div id="analysis" class="section level1">
 <h1>Analysis</h1>
-<pre class="r"><code>set.seed(1)
+<pre class="r"><code>set.seed(11)
 library(CVXR)</code></pre>
 <pre><code>## 
 ## Attaching package: &#39;CVXR&#39;</code></pre>
@@ -378,26 +378,37 @@ pi_init &lt;- pi_init / sum(pi_init)
 eout &lt;- em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)</code></pre>
 </div>
 </div>
+<div id="em-implemented-in-mupdog" class="section level1">
+<h1>EM implemented in mupdog</h1>
+<pre class="r"><code>library(mupdog)
+mout &lt;- mupdog:::uni_em(weight_vec = weight_vec, lmat = inner_weights, pi_init = pi_init, itermax = 200, obj_tol = 10^-4)</code></pre>
+</div>
 <div id="estimates-are-the-same" class="section level1">
 <h1>Estimates are the same!</h1>
 <pre class="r"><code>plot(eout$pivec, type = &quot;h&quot;, main = &quot;em&quot;)</code></pre>
-<p><img src="compare_ash_cvxr_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="compare_ash_cvxr_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <pre class="r"><code>plot(pivec, type = &quot;h&quot;, main = &quot;CVXR&quot;)</code></pre>
-<p><img src="compare_ash_cvxr_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<p><img src="compare_ash_cvxr_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
+<pre class="r"><code>plot(mout, type = &quot;h&quot;, main = &quot;C++ EM&quot;)</code></pre>
+<p><img src="compare_ash_cvxr_files/figure-html/unnamed-chunk-6-3.png" width="672" /></p>
 </div>
-<div id="naive-em-in-r-is-5-times-faster" class="section level1">
-<h1>Naive EM in R is 5 times faster!</h1>
+<div id="speed-comparisons" class="section level1">
+<h1>Speed Comparisons</h1>
 <pre class="r"><code>microbenchmark::microbenchmark(
   cvxr_fun(weight_vec = weight_vec, inner_weights = inner_weights, ploidy = ploidy),
-  em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)
+  em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init),
+  mupdog:::uni_em(weight_vec = weight_vec, lmat = inner_weights, pi_init = pi_init, itermax = 200, obj_tol = 10^-4)
 )</code></pre>
-<pre><code>## Unit: milliseconds
-##                                                                                    expr
-##  cvxr_fun(weight_vec = weight_vec, inner_weights = inner_weights,      ploidy = ploidy)
-##                               em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)
-##     min     lq   mean median     uq    max neval
-##  39.356 41.837 46.113 43.224 44.478 245.27   100
-##   7.462  7.741  8.319  8.054  8.546  10.96   100</code></pre>
+<pre><code>## Unit: microseconds
+##                                                                                                                    expr
+##                                  cvxr_fun(weight_vec = weight_vec, inner_weights = inner_weights,      ploidy = ploidy)
+##                                                               em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)
+##  mupdog:::uni_em(weight_vec = weight_vec, lmat = inner_weights,      pi_init = pi_init, itermax = 200, obj_tol = 10^-4)
+##       min      lq     mean   median       uq       max neval
+##  39460.95 41148.5 45589.85 42644.40 43692.29 243713.01   100
+##   3863.44  3993.4  4246.04  4130.22  4252.39   7087.54   100
+##     40.29    45.2    58.46    62.16    64.81     97.28   100</code></pre>
+<p>The C++ version of the EM algorithm is about 750 times faster than using CVXR!</p>
 </div>
 
 <hr>
