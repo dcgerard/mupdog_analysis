@@ -1,0 +1,102 @@
+---
+title: "Compare CVXR and ash"
+author: "David Gerard"
+date: "March 19, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+NOTE: `ashr` solves a slightly different problem than the one I want.
+
+Here, I compare CVXR to a weighted version of the `ashr` EM algorithm that I code up.
+
+# Analysis
+```{r}
+set.seed(1)
+library(CVXR)
+```
+
+Load data
+```{r}
+cvxlist       <- readRDS("../data/cvx_compare/cvx_params.RDS")
+ploidy        <- 6
+weight_vec    <- cvxlist$weight_vec
+inner_weights <- matrix(runif((ploidy + 1) ^ 2), ncol = ploidy + 1)
+inner_weights <- inner_weights / rowSums(inner_weights)
+```
+
+## CVXR Way
+
+```{r}
+cvxr_fun <- function(weight_vec, inner_weights, ploidy) {
+  cv_pi <- CVXR::Variable(1, ploidy + 1)
+  obj   <- sum(t(weight_vec) * log(cv_pi %*% inner_weights))
+  prob  <- CVXR::Problem(CVXR::Maximize(obj),
+                         constraints = list(sum(cv_pi) == 1,
+                                            cv_pi >= 0))
+  result <- solve(prob)
+  pivec <- c(result$getValue(cv_pi))
+  return(pivec)
+}
+pivec <- cvxr_fun(weight_vec = weight_vec, inner_weights = inner_weights, ploidy = ploidy)
+```
+
+## EM way
+
+```{r}
+lmat <- t(inner_weights)
+em <- function(weight_vec, lmat, pivec, itermax = 200, tol = 10 ^ -6) {
+  index <- 1
+  err   <- tol + 1
+  obj   <- -Inf
+  objvec <- obj
+  while(index < itermax & err > tol) {
+    obj_old <- obj
+    etamat <- sweep(x = lmat, MARGIN = 2, STATS = pivec, FUN = `*`)
+    etamat <- etamat / rowSums(etamat)
+    etamat <- etamat * weight_vec
+    nvec <- colSums(etamat)
+    pivec <- nvec / sum(nvec)
+    
+    obj <- sum(weight_vec * log(lmat %*% pivec))
+    objvec <- c(objvec, obj)
+    err <- abs(obj - obj_old)
+    index <- index + 1
+  }
+  
+  return_list        <- list()
+  return_list$pivec  <- pivec
+  return_list$objvec <- objvec
+  return(return_list)
+}
+
+pi_init <- runif(ploidy + 1)
+pi_init <- pi_init / sum(pi_init)
+eout <- em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)
+```
+
+# Estimates are the same!
+
+```{r}
+plot(eout$pivec, type = "h", main = "em")
+plot(pivec, type = "h", main = "CVXR")
+```
+
+# Naive EM in R is 5 times faster!
+
+```{r}
+microbenchmark::microbenchmark(
+  cvxr_fun(weight_vec = weight_vec, inner_weights = inner_weights, ploidy = ploidy),
+  em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)
+)
+```
+
+
+
+
+

@@ -9,9 +9,11 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="David Gerard" />
 
+<meta name="date" content="2018-03-19" />
 
-<title>Home</title>
+<title>Compare CVXR and ash</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,6 +21,9 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -164,6 +169,101 @@ $(document).ready(function () {
 
 
 
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
 
 
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
@@ -204,48 +304,100 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Home</h1>
+<h1 class="title toc-ignore">Compare CVXR and ash</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>March 19, 2018</em></h4>
 
 </div>
 
 
-<ul>
-<li><a href="check_0_1.html">I think sufficient conditions are that R is psd and has diagonal entries less than or equal to 1.</a></li>
-<li><a href="explore_mbb.html">Exploring a new generalization of the BB to allow for correlation.</a> The observations appear to be marginally beta-binomial, which is really cool. The sample correlation looks about the same as the “correlation” matrix used in the conditional distributions.</li>
-<li><a href="check_bb_integral.html">The integral over the log BB density checks out</a></li>
-<li><a href="try_mupdog_1.html">mupdog looks pretty good for a first try!</a> Interestingly, those inbreeding coefficients just don’t matter.</li>
-<li><a href="try_mupdog_1000.html">mupdog still looks good when using 1000 Shirasawa SNPs</a>. No major difference here than with using 500 SNPs.</li>
-<li><a href="no_cor.html">When contrain correlations to be 0, inbreeding still estimated to be 0.</a> Also, in high-bias SNP’s, some of the genotyping seems a little off.</li>
-<li><a href="compare_cor_nocor.html">Benefits of fitting correlation mostly apparent in high-bias SNPs</a></li>
-<li><a href="uitdewilligen.html">awesome results using the data from uidewilligen et al.</a> (1) The correlation matrix clearly clusters into two distinct groups. I wonder if there was a family in one group and the general population in the other. (2) High coverage SNPs look bad but moderate coverage SNP’s look fantastic. Are the high-coverage SNP’s due to something like copy number variation? (3) Inbreeding is more important in this non-sib population.</li>
-<li><a href="depth.html">Looked at some filtering trends.</a> It seems that there is a higher incidence of bad-SNPs at the higher covered SNPs. Some generous filters seem to keep mostly good-looking SNPs.</li>
-<li><a href="weird_ind.html">Individual 51 of the Uitdewilligen dataset has a super high od parameter on the genotypes.</a> I think its sample is corrupted. The readcounts always either all ref or all alt, even when all of the other individuals are all the other allele.</li>
-<li><a href="uit_corr.html">Cannot get empirical estimated correlation to match estimated correlation.</a></li>
-<li><a href="uitdewilligen_nocorr.html">When fitting without corr, get very different bias estimates and the genotyping results don’t look good where they differ.</a></li>
-<li><a href="uitdewilligen_k2.html">Assuming diploid when tetraploid to uitdewilligen data results in lower objective value</a></li>
-<li><a href="uitdewilligen_k6.html">Assuming hexaploid when tetraploid to uitdewilligen data results in lower objective value</a></li>
-<li><a href="shir_fix_corr.html">Adding correlation helps in mislabelings in Shirasawa data</a></li>
-<li><a href="corr_mle.html">I am updating the correlation matrix incorrectly.</a> I don’t know yet how much this matters.</li>
-<li><a href="normal_bb.html">A non-1 variance biases the distribution away from <span class="math inline">\(K\mu\)</span>. This would make the allele frequencies harder to interpret.</a></li>
-<li><a href="shirasawa_nodiag_constraint.html">Fit Shirasawa data without the covariance matrix constrained to be diagonal.</a> Can pick out the parent easily.</li>
-<li><a href="shir_corr.html">You can understand the negative correlations by the fact that we are first removing the allele frequencies at each locus before calculating this correlation</a></li>
-<li><a href="oracle_miss.html">Oracle misclassification error rates</a></li>
-<li><a href="bias_or_remove.html">Oracle rates indicate that it’s better to account for bias directly rather than use WASP (which decreases the sample size).</a></li>
-</ul>
-<div id="looking-at-the-mupdog-distribution" class="section level1">
-<h1>Looking at the <code>mupdog</code> distribution</h1>
-<ul>
-<li><a href="kl_div.html">The Gaussian Binomial can mimic the distribution of a convolution of two hypergeometrics in most cases, but it doesn’t do as well when the same variance needs to be shared across loci</a></li>
-</ul>
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>NOTE: <code>ashr</code> solves a slightly different problem than the one I want.</p>
+<p>Here, I compare CVXR to a weighted version of the <code>ashr</code> EM algorithm that I code up.</p>
 </div>
-<div id="flexdog" class="section level1">
-<h1>Flexdog</h1>
-<ul>
-<li><a href="flexdog_try1.html"><code>mupdog</code> works as well or better than <code>flexdog</code> in every SNP I try in the Shirasawa dataset</a>. Note that <code>mupdog</code> is technically a mispecified model whereas <code>flexdog</code> is technically correctly specified (because the genotype distribution is unimodal). The problem seems to be that the bias parameter is estimated unstably. We need a better way to estimate it. Some sort of adaptive regularization?</li>
-<li><a href="flexdog_v_updog.html"><code>flexdog</code> with option <code>model = &quot;hw&quot;</code> is same as <code>updog</code> with option <code>model = &quot;hw&quot;</code></a>.</li>
-<li><a href="flex_v_up_speed.html"><code>flexdog</code> is slightly faster than <code>updog</code></a></li>
-<li><a href="compare_ash_cvxr.html">Simple EM is faster than CVXR in unimodal update</a></li>
-</ul>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<pre class="r"><code>set.seed(1)
+library(CVXR)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;CVXR&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:stats&#39;:
+## 
+##     power</code></pre>
+<p>Load data</p>
+<pre class="r"><code>cvxlist       &lt;- readRDS(&quot;../data/cvx_compare/cvx_params.RDS&quot;)
+ploidy        &lt;- 6
+weight_vec    &lt;- cvxlist$weight_vec
+inner_weights &lt;- matrix(runif((ploidy + 1) ^ 2), ncol = ploidy + 1)
+inner_weights &lt;- inner_weights / rowSums(inner_weights)</code></pre>
+<div id="cvxr-way" class="section level2">
+<h2>CVXR Way</h2>
+<pre class="r"><code>cvxr_fun &lt;- function(weight_vec, inner_weights, ploidy) {
+  cv_pi &lt;- CVXR::Variable(1, ploidy + 1)
+  obj   &lt;- sum(t(weight_vec) * log(cv_pi %*% inner_weights))
+  prob  &lt;- CVXR::Problem(CVXR::Maximize(obj),
+                         constraints = list(sum(cv_pi) == 1,
+                                            cv_pi &gt;= 0))
+  result &lt;- solve(prob)
+  pivec &lt;- c(result$getValue(cv_pi))
+  return(pivec)
+}
+pivec &lt;- cvxr_fun(weight_vec = weight_vec, inner_weights = inner_weights, ploidy = ploidy)</code></pre>
+</div>
+<div id="em-way" class="section level2">
+<h2>EM way</h2>
+<pre class="r"><code>lmat &lt;- t(inner_weights)
+em &lt;- function(weight_vec, lmat, pivec, itermax = 200, tol = 10 ^ -6) {
+  index &lt;- 1
+  err   &lt;- tol + 1
+  obj   &lt;- -Inf
+  objvec &lt;- obj
+  while(index &lt; itermax &amp; err &gt; tol) {
+    obj_old &lt;- obj
+    etamat &lt;- sweep(x = lmat, MARGIN = 2, STATS = pivec, FUN = `*`)
+    etamat &lt;- etamat / rowSums(etamat)
+    etamat &lt;- etamat * weight_vec
+    nvec &lt;- colSums(etamat)
+    pivec &lt;- nvec / sum(nvec)
+    
+    obj &lt;- sum(weight_vec * log(lmat %*% pivec))
+    objvec &lt;- c(objvec, obj)
+    err &lt;- abs(obj - obj_old)
+    index &lt;- index + 1
+  }
+  
+  return_list        &lt;- list()
+  return_list$pivec  &lt;- pivec
+  return_list$objvec &lt;- objvec
+  return(return_list)
+}
+
+pi_init &lt;- runif(ploidy + 1)
+pi_init &lt;- pi_init / sum(pi_init)
+eout &lt;- em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)</code></pre>
+</div>
+</div>
+<div id="estimates-are-the-same" class="section level1">
+<h1>Estimates are the same!</h1>
+<pre class="r"><code>plot(eout$pivec, type = &quot;h&quot;, main = &quot;em&quot;)</code></pre>
+<p><img src="compare_ash_cvxr_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>plot(pivec, type = &quot;h&quot;, main = &quot;CVXR&quot;)</code></pre>
+<p><img src="compare_ash_cvxr_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+</div>
+<div id="naive-em-in-r-is-5-times-faster" class="section level1">
+<h1>Naive EM in R is 5 times faster!</h1>
+<pre class="r"><code>microbenchmark::microbenchmark(
+  cvxr_fun(weight_vec = weight_vec, inner_weights = inner_weights, ploidy = ploidy),
+  em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)
+)</code></pre>
+<pre><code>## Unit: milliseconds
+##                                                                                    expr
+##  cvxr_fun(weight_vec = weight_vec, inner_weights = inner_weights,      ploidy = ploidy)
+##                               em(weight_vec = weight_vec, lmat = lmat, pivec = pi_init)
+##     min     lq   mean median     uq    max neval
+##  39.356 41.837 46.113 43.224 44.478 245.27   100
+##   7.462  7.741  8.319  8.054  8.546  10.96   100</code></pre>
 </div>
 
 <hr>
@@ -274,6 +426,8 @@ $(document).ready(function () {
 -->
 
 
+</div>
+</div>
 
 </div>
 

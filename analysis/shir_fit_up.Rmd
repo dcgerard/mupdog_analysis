@@ -1,0 +1,34 @@
+---
+title: "Fit All Updog"
+author: "David Gerard"
+date: "March 18, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Fit updog to the Shirasawa data again.
+
+# Analysis
+
+Mupdog fit to Shirasawa data.
+```{r}
+mout <- readRDS("../output/shir_fit/shir_fit_nodiag1.RDS")
+```
+
+Fit updog
+```{r}
+nsnp <- ncol(mout$input$refmat)
+for (index in 1:nsnp) {
+  cat("Index:", index, "\n")
+  refvec  <- mout$input$refmat[, index]
+  sizevec <- mout$input$sizemat[, index]
+  uout <- updog(ocounts = refvec, osize = sizevec, 
+                ploidy = 6, model = "s1", non_mono_max = 1)
+}
+```
+
