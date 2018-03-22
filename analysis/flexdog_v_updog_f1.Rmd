@@ -1,0 +1,65 @@
+---
+title: "Updog vs Flexdog"
+author: "David Gerard"
+date: "March 22, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I just made it so that flexdog supports F1 and S1 populations. Here, I want to compare the fit of flexdog with that of updog and compare the time it takes to fit.
+
+# Analysis
+
+```{r, message=FALSE}
+library(updog)
+library(mupdog)
+library(tidyverse)
+mout <- readRDS("../output/shir_fit/shir_fit_nodiag1.RDS")
+```
+
+
+```{r}
+for (index in 1:10) {
+  ploidy  <- mout$input$ploidy 
+  refvec  <- mout$input$refmat[-1, index]
+  pref    <- mout$input$refmat[1, index]
+  sizevec <- mout$input$sizemat[-1, index]
+  psize   <- mout$input$sizemat[1, index]
+
+  utime <- system.time({
+    uout <- updog(ocounts = refvec, osize = sizevec, ploidy = ploidy, 
+                  model = "s1", out_prop = 0, update_outprop = FALSE)
+  })
+  ftime <- system.time({
+    fout <- flexdog(refvec = refvec, sizevec = sizevec, ploidy = ploidy,
+                    model = "s1", verbose = FALSE, 
+                    p1ref = pref, p1size = psize, 
+                    fs1_alpha = 10^-5)
+  })
+  
+  ## flexdog is 3-4 times faster
+  cat("updog:", utime["elapsed"], "\n")
+  cat("flexdog:", ftime["elapsed"], "\n\n")
+  
+  ## They have the same posterior means
+  pl <- qplot(uout$postmean, fout$postmean) +
+    theme_bw() +
+    xlab("updog") +
+    ylab("flexdog") +
+    geom_abline(slope = 1, intercept = 0) +
+    ggtitle("Posterior Means")
+  print(pl)  
+}
+```
+
+
+
+```{r}
+sessionInfo()
+```
+

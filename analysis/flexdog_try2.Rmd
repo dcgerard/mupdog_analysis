@@ -24,7 +24,7 @@ mout <- readRDS("../output/shir_fit/shir_fit_nodiag1.RDS")
 
 Extract SNP1 data.
 ```{r, cache=TRUE}
-index <- 3
+index <- 2
 refvec  <- mout$input$refmat[, index]
 sizevec <- mout$input$sizemat[, index]
 ploidy  <- mout$input$ploidy
@@ -40,8 +40,34 @@ atime <- system.time({
                 ploidy = ploidy, model = "ash", 
                 use_cvxr = FALSE)
 })
+htime <- system.time({
+  hout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "hw")
+})
+ftime <- system.time({
+  fout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "flex")
+})
+f1time <- system.time({
+  f1out <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "f1")
+})
+s1time <- system.time({
+  s1out <- flexdog(refvec = refvec, sizevec = sizevec, 
+                ploidy = ploidy, model = "s1")
+})
+utime <- system.time({
+  uout <- updog::updog(ocounts = refvec, osize = sizevec, 
+                       ploidy = ploidy, model = "s1", 
+                       update_outprop = FALSE, out_prop = 0)
+})
 ctime["elapsed"]
 atime["elapsed"]
+ftime["elapsed"]
+htime["elapsed"]
+f1time["elapsed"]
+s1time["elapsed"]
+utime["elapsed"]
 ```
 
 It's all the same
