@@ -36,3 +36,4 @@ output:
 * [`flexdog` is slightly faster than `updog`](flex_v_up_speed.html)
 * [Simple EM is faster than CVXR in unimodal update](compare_ash_cvxr.html)
 * [Compare CVXR and EM implementations of flexdog](flexdog_try2.html)
+* [`flexdog` with `model = "s1"` gives same results as `updog` with `model = "s1"` but is 3-6 times faster.](flexdog_v_updog_f1.html)
