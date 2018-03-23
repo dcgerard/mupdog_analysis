@@ -1,0 +1,72 @@
+---
+title: "Ash pen"
+author: "David Gerard"
+date: "March 23, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Analysis
+
+Large ash penalty do not affect fit. Small ash penalties are bad. I only make this claim for this SNP.
+
+```{r, message=FALSE}
+library(mupdog)
+library(tidyverse)
+mout <- readRDS("../output/shir_fit/shir_fit_nodiag1.RDS")
+```
+
+## SNP 1
+
+Extract SNP1 data.
+```{r, cache=TRUE}
+index <- 2
+refvec  <- mout$input$refmat[, index]
+sizevec <- mout$input$sizemat[, index]
+ploidy  <- mout$input$ploidy
+```
+
+```{r}
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+              ploidy = ploidy, model = "ash", 
+              use_cvxr = FALSE, ashpen = 10^-3)
+plot(aout)
+```
+
+```{r}
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+              ploidy = ploidy, model = "ash", 
+              use_cvxr = FALSE, ashpen = 1)
+plot(aout)
+```
+
+```{r}
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+              ploidy = ploidy, model = "ash", 
+              use_cvxr = FALSE, ashpen = 10)
+plot(aout)
+```
+
+```{r}
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+              ploidy = ploidy, model = "ash", 
+              use_cvxr = FALSE, ashpen = 100)
+plot(aout)
+```
+
+```{r}
+aout <- flexdog(refvec = refvec, sizevec = sizevec, 
+              ploidy = ploidy, model = "ash", 
+              use_cvxr = FALSE, ashpen = 1000)
+plot(aout)
+```
+
+
+
+```{r}
+sessionInfo()
+```
+

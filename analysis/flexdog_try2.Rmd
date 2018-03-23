@@ -38,7 +38,7 @@ ctime <- system.time({
 atime <- system.time({
   aout <- flexdog(refvec = refvec, sizevec = sizevec, 
                 ploidy = ploidy, model = "ash", 
-                use_cvxr = FALSE)
+                use_cvxr = FALSE, ashpen = 100)
 })
 htime <- system.time({
   hout <- flexdog(refvec = refvec, sizevec = sizevec, 
@@ -61,6 +61,11 @@ utime <- system.time({
                        ploidy = ploidy, model = "s1", 
                        update_outprop = FALSE, out_prop = 0)
 })
+unitime <- system.time({
+  uniout <- updog::updog(ocounts = refvec, osize = sizevec, 
+                         ploidy = ploidy, model = "uniform", 
+                         update_outprop = FALSE, out_prop = 0)
+})
 ctime["elapsed"]
 atime["elapsed"]
 ftime["elapsed"]
@@ -68,6 +73,7 @@ htime["elapsed"]
 f1time["elapsed"]
 s1time["elapsed"]
 utime["elapsed"]
+unitime["elapsed"]
 ```
 
 It's all the same
