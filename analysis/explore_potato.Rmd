@@ -1,0 +1,92 @@
+---
+title: "Explore Potato"
+author: "David Gerard"
+date: "April 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Explore the Potato SNP Felipe gave me.
+
+# Analysis
+
+```{r}
+library(tidyverse)
+library(updog)
+library(mupdog)
+snpdat <- read.csv("../data/potato/updog_v_GATK.csv")
+```
+
+```{r}
+ploidy  <- 4
+refvec  <- snpdat$Alt.Count
+sizevec <- snpdat$Depth
+outnum <- which.max(sizevec)
+refvec_small <- refvec[-outnum]
+sizevec_small <- sizevec[-outnum]
+
+plot_geno(ocounts = refvec_small, osize = sizevec_small, ploidy = ploidy) +
+  ggtitle("without outlier")
+
+plot_geno(ocounts = refvec, osize = sizevec, ploidy = ploidy) +
+  ggtitle("with outlier")
+```
+
+Fit various versions
+```{r}
+uout_noout <- updog(ocounts = refvec, osize = sizevec, ploidy = ploidy, model = "hw", 
+                    update_outprop = FALSE, out_prop = 0)
+uout_out <- updog(ocounts = refvec, osize = sizevec, ploidy = ploidy, model = "hw")
+uout_small_noout <- updog(ocounts = refvec_small, osize = sizevec_small, ploidy = ploidy, model = "hw",
+                          update_outprop = FALSE, out_prop = 0)
+uout_small_out <- updog(ocounts = refvec_small, osize = sizevec_small, ploidy = ploidy, model = "hw")
+```
+
+```{r}
+## Full Data, No Outliers
+plot(uout_noout)
+
+## Full Data, Outliers
+plot(uout_out)
+
+## Small Data, No Oultiers
+plot(uout_small_noout)
+
+## Small Data, Outliers
+plot(uout_small_out)
+```
+
+No concordance between the two
+```{r}
+plot(uout_noout$ogeno, jitter(snpdat$updog), xlab = "My Fit", ylab = "Updog Colleague Fit")
+abline(0, 1)
+```
+
+Plenty of concordance between GATK and my updog fit
+```{r}
+plot(uout_noout$ogeno, jitter(snpdat$GATK), xlab = "My Fit", ylab = "GATK Colleague Fit")
+abline(0, 1)
+```
+
+## Get p-value of outlier
+```{r}
+prob3 <- mupdog:::xi_fun(p = 3/4, eps = uout_noout$seq_error, h = uout_noout$bias_val)
+1 - pbetabinom(q = refvec[outnum], size = sizevec[outnum], mu = prob3, rho = uout_noout$od_param, log_p = FALSE)
+```
+
+## Look at individual 2
+```{r}
+plot(sizevec[-outnum], uout_noout$maxpostprob[-outnum], xlab = "depth", ylab = "maxpostprob")
+```
+
+## Try flexdog
+
+```{r}
+fout <- flexdog(refvec = refvec, sizevec = sizevec, ploidy = ploidy, model = "ash")
+```
+

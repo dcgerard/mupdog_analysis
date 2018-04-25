@@ -1,0 +1,166 @@
+---
+title: "Why Does Updog Do Poorly on Subsets of Data?"
+author: "David Gerard"
+date: "April 25, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abtract
+
+Here, I explore why updog does poorly on a subset of the simulated data.
+
+# Analysis
+
+```{r}
+library(tidyverse)
+library(updog)
+simsdat <- read.csv("../../../reproduce_genotyping/Output/sims_out/sims_out.csv")
+badindex <- which(simsdat$bias_val == 1 & simsdat$od_param == 0.01 & simsdat$uham < 0.5) ## this is also the seed of one_rep
+```
+
+Same way I calculated parvals in simulations
+```{r}
+## Read in size data to get realistic size distribution --------------------------------
+size_mat   <- read.csv( "../../../reproduce_genotyping/Output/shirasawa_snps/example_readcounts.csv", row.names = 1)
+
+
+## Parameters to explore --------------------------------------------
+bias_seq  <- c(1, 0.75, 0.5, 0.25)
+seq_error <- 0.005 ## Constant throughout
+out_prop  <- 0
+od_seq    <- c(0, 0.01, 0.05)
+ploidy    <- 6
+itermax   <- 1000
+
+## Set up `updog` object parameters that don't vary ------------------
+usame               <- list()
+usame$input$ploidy  <- ploidy
+usame$input$model   <- "hw"
+usame$seq_error     <- seq_error
+usame$out_prop      <- out_prop
+usame$p1geno        <- -1
+usame$p2geno        <- -1
+usame$out_mean      <- 1/2
+usame$out_disp      <- 1/3
+class(usame)        <- "updog"
+
+
+## Run Simulations ------------------------------------------------
+parvals <- expand.grid(allele_freq = seq(0.05, 0.95, length = itermax), bias_val = bias_seq, od_param = od_seq)
+parvals$seed <- 1:nrow(parvals)
+parvals$osize <- sapply(size_mat[, 1:itermax], function(x) x[!is.na(x)])
+
+par_list <- list()
+for (list_index in 1:nrow(parvals)) {
+  par_list[[list_index]] <- list()
+  for (inner_list_index in 1:(ncol(parvals) - 1)) {
+    par_list[[list_index]][[inner_list_index]] <- parvals[list_index, inner_list_index]
+    names(par_list[[list_index]])[inner_list_index] <- colnames(parvals)[inner_list_index]
+  }
+}
+
+for (list_index in 1:nrow(parvals)) {
+  par_list[[list_index]]$input$osize <- parvals$osize[[list_index]]
+}
+```
+
+
+
+Run the one rep
+```{r}
+unew <- par_list[[badindex]]
+
+
+  set.seed(unew$seed)
+  usim             <- usame
+  usim$bias_val    <- unew$bias_val
+  usim$allele_freq <- unew$allele_freq
+  usim$od_param    <- unew$od_param
+  usim$input$osize <- unew$input$osize
+
+  ## Simulate New Data ----------------------------------------------
+  rout       <- updog::rupdog(usim)
+  ocounts    <- rout$input$ocounts
+  osize      <- rout$input$osize
+  true_ogeno <- rout$ogeno
+
+  ## Run updog -------------------------------------------------
+  bias_start <- exp(-2:2 * 0.7) ## plus to minus three sd
+  llike_old <- -Inf
+  for (index in 1:length(bias_start)) {
+    utemp <- updog::updog_vanilla(ocounts = ocounts, osize = osize, ploidy = usim$input$ploidy, model = "hw",
+                                 out_prop = 0, update_outprop = FALSE, bias_val = bias_start[index], non_mono_max = Inf)
+    if (utemp$llike > llike_old) {
+      uout <- utemp
+      llike_old <- uout$llike
+    }
+  }
+```
+
+Plot looks reasonable, just genotype 1 looks bad.
+```{r}
+plot(uout)
+```
+
+```{r}
+uone <- updog(ocounts = rout$input$ocounts, 
+              osize = rout$input$osize, 
+              ploidy = rout$input$ploidy, 
+              model = "f1", 
+              bias_val = 1, 
+              update_bias_val = FALSE)
+```
+
+Fixing it at one has lower likelihood
+```{r}
+uone$llike
+uout$llike
+```
+
+
+But it does have nicer looking fits
+```{r}
+plot(uone)
+```
+
+The bias is way off
+```{r}
+unew$bias_val
+uout$bias_val
+```
+
+The 95\% confidence interval for bias isn't too large
+```{r}
+uout$bias_val
+exp(uout$log_bias + 2 * sqrt(uout$covmat[1, 1]))
+exp(uout$log_bias - 2 * sqrt(uout$covmat[1, 1]))
+```
+
+od is way off
+```{r}
+unew$od_param
+uout$od_param
+```
+
+But `prop_mis` will at least flag this SNP
+```{r}
+uout$prop_mis
+```
+
+The genotypes are all shifted away from the truth
+```{r}
+ggplot(data_frame(geno = factor(rout$ogeno), pm = uout$postmean), aes(x = geno, y = pm)) +
+  geom_boxplot() +
+  theme_bw() +
+  geom_abline(slope = 1, intercept = -1)
+```
+
+
+
+
+
+

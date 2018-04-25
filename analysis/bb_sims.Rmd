@@ -1,0 +1,77 @@
+---
+title: "See if BB works from Simulated Data"
+author: "David Gerard"
+date: "April 18, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I check to see if the BB option will work in data simulated from BB.
+
+It seems that the correct prior is important mostly when there is large OD (in the reads, not the genotypes).
+
+# Analysis
+
+```{r}
+library(updog)
+library(mupdog)
+```
+
+
+```{r}
+set.seed(4)
+ploidy <- 6
+seq    <- 0.001
+od     <- 0.01
+bias   <- 0.7
+geno_od <- 0.1
+allele_freq <- 0.2
+data("snpdat")
+geno_vec <- rgeno(n = 100, ploidy = ploidy, model = "bb", allele_freq = allele_freq, od = geno_od)
+sizevec  <- snpdat$size[1:100]
+refvec   <- rflexdog(sizevec = sizevec, geno = geno_vec, ploidy = ploidy, seq = seq, bias = bias, od = od)
+```
+
+```{r}
+fout <- flexdog(refvec = refvec, sizevec = sizevec, ploidy = ploidy, model = "bb")
+```
+
+```{r}
+fout$par
+```
+
+Genotyping is mostly corect
+```{r}
+mean(fout$geno == geno_vec)
+```
+
+```{r}
+plot(fout)
+```
+
+
+Same accuracy as assuming HWE:
+```{r}
+hout <- flexdog(refvec = refvec, sizevec = sizevec, ploidy = ploidy, model = "hw")
+mean(hout$geno == geno_vec)
+hout$par
+```
+```{r}
+aout <- flexdog(refvec = refvec, sizevec = sizevec, ploidy = ploidy, model = "ash", ashpen = 0)
+mean(aout$geno == geno_vec)
+```
+
+```{r}
+truedist <- mupdog::dbetabinom(x = 0:ploidy, size = ploidy, mu = allele_freq, rho = geno_od, log = FALSE)
+plot(0:ploidy, truedist, type = "h", ylim = c(0, 0.5))
+points(0:ploidy + 0.1, fout$gene_dist, type = "h", col = 2, lty = 2)
+points(0:ploidy + 0.2, hout$gene_dist, type = "h", col = 3, lty = 3)
+points(0:ploidy + 0.3, aout$gene_dist, type = "h", col = 4, lty = 4)
+legend("topright", lty = 1:4, col = 1:4, legend = c("True", "BB Est", "HW Est", "Unimodal"))
+```
+

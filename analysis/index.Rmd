@@ -26,6 +26,7 @@ output:
 * [You can understand the negative correlations by the fact that we are first removing the allele frequencies at each locus before calculating this correlation](shir_corr.html)
 * [Oracle misclassification error rates](oracle_miss.html)
 * [Oracle rates indicate that it's better to account for bias directly rather than use WASP (which decreases the sample size).](bias_or_remove.html)
+* [Explore why updog does poorly on subset of data](why_does_updog_do_poorly.html)
 
 # Looking at the `mupdog` distribution
 * [The Gaussian Binomial can mimic the distribution of a convolution of two hypergeometrics in most cases, but it doesn't do as well when the same variance needs to be shared across loci](kl_div.html)
@@ -38,3 +39,5 @@ output:
 * [Compare CVXR and EM implementations of flexdog](flexdog_try2.html)
 * [`flexdog` with `model = "s1"` gives same results as `updog` with `model = "s1"` but is 3-6 times faster.](flexdog_v_updog_f1.html)
 * [unimodal option relatively robust to penalty as long as it is large enough](ashpen.html)
+* [BB od is estimated near 0 when truth is S1](try_bb_option_flexdog.html). This makes sense since F1 is even *less* dispersed than HWE.
+* [Normal option doesn't work so well on SNP2](norm_flex.html)

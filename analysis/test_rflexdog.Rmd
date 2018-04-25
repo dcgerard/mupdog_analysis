@@ -1,0 +1,32 @@
+---
+title: "Test rflexdog"
+author: "David Gerard"
+date: "April 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I do some empirical checks on `rflexdog`.
+
+# Analysis
+
+## S1
+```{r}
+library(mupdog)
+emp_val <- rgeno(n = 100000, ploidy = 4, model = "s1", p1geno = 2)
+prop.table(table(emp_val))
+updog::get_q_array(4)[3, 3, ]
+```
+
+## HW
+```{r}
+library(mupdog)
+emp_val <- rgeno(n = 100000, ploidy = 4, model = "hw", allele_freq = 0.3)
+prop.table(table(emp_val))
+dbinom(x = 0:4, size = 4, prob = 0.3)
+```

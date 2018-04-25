@@ -1,0 +1,31 @@
+library(mupdog)
+library(tidyverse)
+ploidy_seq <- c(2, 4, 6)
+seq        <- 0.001
+bias_seq   <- seq(0.5, 1, length = 21)
+od_seq     <- seq(0, 0.02, length = 21)
+nseq       <- 1:1000
+alpha_seq  <- c(0.5, 0.6, 0.7, 0.8, 0.9, 0.95)
+expand.grid(n      = nseq,
+            ploidy = ploidy_seq,
+            seq    = seq,
+            bias   = bias_seq,
+            od     = od_seq,
+            alpha  = alpha_seq) %>%
+  as_data_frame() ->
+  odat
+odat$pmiss <- NA
+class(odat$pmiss) <- "numeric"
+
+for (index in 1:nrow(odat)) {
+  dist <- stats::dbinom(x = 0:odat$ploidy[index],
+                        size = odat$ploidy[index],
+                        prob = odat$alpha[index])
+  odat$pmiss[index] <- oracle_mis(n = odat$n[index],
+                                  ploidy = odat$ploidy[index],
+                                  seq = odat$seq[index],
+                                  bias = odat$bias[index],
+                                  od = odat$od[index],
+                                  dist = dist)
+}
+saveRDS(object = odat, file = "../output/oracle_explore/odat.RDS")

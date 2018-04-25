@@ -1,0 +1,57 @@
+---
+title: "Test BB option on Shirasawa Data"
+author: "David Gerard"
+date: "April 18, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I test the new BB option for the genotype distribution in the Shirasawa data.
+
+The OD parameter is estimated to be near the minimum I allow. This makes sense since the Shirasawa data consists of siblings, which have *less* dispersed genotypes than a binomial, not more like the assumption when using the "bb" option.
+
+# Analysis
+
+```{r}
+library(mupdog)
+library(updog)
+library(tidyverse)
+data("snpdat")
+```
+
+SNP 1
+```{r}
+smalldat <- filter(snpdat, snp == "SNP1")
+fout <- flexdog(refvec = smalldat$counts, sizevec = smalldat$size, ploidy = 6, model = "bb")
+fout$par
+```
+
+SNP 2
+```{r}
+smalldat <- filter(snpdat, snp == "SNP2")
+fout <- flexdog(refvec = smalldat$counts, sizevec = smalldat$size, ploidy = 6, model = "bb")
+fout$par
+```
+
+SNP 3
+```{r}
+smalldat <- filter(snpdat, snp == "SNP3")
+fout <- flexdog(refvec = smalldat$counts, sizevec = smalldat$size, ploidy = 6, model = "bb")
+fout$par
+```
+
+
+# Demonstrate that HW is more dispersed
+```{r}
+true_dist <- updog::get_q_array(6)[6,6, ]
+hwe_dist <- dbinom(0:6, 6, 5/6)
+plot(0:6, true_dist, type = "h")
+points(0:6 + 0.1, hwe_dist, type = "h", col = 2, lty = 2)
+legend("topleft", lty = c(1, 2), col = c(1, 2), legend = c("S1", "HWE"))
+```
+
