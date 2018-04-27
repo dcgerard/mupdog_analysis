@@ -41,3 +41,7 @@ output:
 * [unimodal option relatively robust to penalty as long as it is large enough](ashpen.html)
 * [BB od is estimated near 0 when truth is S1](try_bb_option_flexdog.html). This makes sense since F1 is even *less* dispersed than HWE.
 * [Normal option doesn't work so well on SNP2](norm_flex.html)
+
+# fitPoly
+* [Try `fitPoly` on the Shirasawa data](fit_poly_shir.html). It does just as well in genotyping, but the differences in precision estimates for each individual are very different.
+

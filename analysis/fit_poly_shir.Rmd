@@ -1,0 +1,103 @@
+---
+title: "fitPoly_on_shir"
+author: "David Gerard"
+date: "April 27, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+`fitPoly` works really really well on the shirasawa data.
+
+# Analysis
+```{r}
+library(updog)
+library(tidyverse)
+library(fitPoly)
+data("snpdat")
+snpdat %>%
+  transmute(SampleName = id,
+            MarkerName = snp,
+            ratio = counts / size) ->
+  subdat
+```
+
+```{r}
+ploidy <- 6
+refvec <- filter(snpdat, snp == "SNP1")$counts
+sizevec <- filter(snpdat, snp == "SNP1")$size
+
+uout <- updog(ocounts = refvec, osize = sizevec, ploidy = ploidy, model = "s1")
+fp   <- fitOneMarker(ploidy = ploidy, marker = "SNP1", data = subdat)
+
+## Similar genotyping
+table(fp$scores$maxgeno, uout$ogeno)
+
+plot_geno(ocounts = refvec, osize = sizevec, ploidy = ploidy, ogeno = fp$scores$maxgeno) +
+  ggtitle("fitPoly")
+plot_geno(ocounts = refvec, osize = sizevec, ploidy = ploidy, ogeno = uout$ogeno,
+          bias_val = uout$bias_val, seq_error = uout$seq_error) +
+  ggtitle("updog")
+```
+
+```{r}
+ploidy <- 6
+refvec <- filter(snpdat, snp == "SNP2")$counts
+sizevec <- filter(snpdat, snp == "SNP2")$size
+
+uout <- updog(ocounts = refvec, osize = sizevec, ploidy = ploidy, model = "s1")
+fp   <- fitOneMarker(ploidy = ploidy, marker = "SNP2", data = subdat, plot = "fitted")
+
+## Similar genotyping
+table(fp$scores$maxgeno, uout$ogeno)
+
+plot_geno(ocounts = refvec, osize = sizevec, ploidy = ploidy, ogeno = fp$scores$maxgeno) +
+  ggtitle("fitPoly")
+plot_geno(ocounts = refvec, osize = sizevec, ploidy = ploidy, ogeno = uout$ogeno, 
+          bias_val = uout$bias_val, seq_error = uout$seq_error) +
+  ggtitle("updog")
+```
+
+```{r}
+ploidy <- 6
+refvec <- filter(snpdat, snp == "SNP3")$counts
+sizevec <- filter(snpdat, snp == "SNP3")$size
+
+uout <- updog(ocounts = refvec, osize = sizevec, ploidy = ploidy, model = "s1")
+fp   <- fitOneMarker(ploidy = ploidy, marker = "SNP3", data = subdat, plot = "fitted")
+
+## Similar genotyping
+table(fp$scores$maxgeno, uout$ogeno)
+
+plot_geno(ocounts = refvec, osize = sizevec, ploidy = ploidy, ogeno = fp$scores$maxgeno) +
+  ggtitle("fitPoly")
+plot_geno(ocounts = refvec, osize = sizevec, ploidy = ploidy, ogeno = uout$ogeno, 
+          bias_val = uout$bias_val, seq_error = uout$seq_error) +
+  ggtitle("updog")
+```
+
+They discard a lot of individuals
+
+```{r}
+table(fp$scores$geno, useNA = "ifany")
+```
+
+The maxpostprob of these discarded individuals are all below 0.95
+```{r}
+max(uout$maxpostprob[is.na(fp$scores$geno)])
+```
+
+They include some really low maxpostprob individuals though.
+```{r}
+min(uout$maxpostprob[!is.na(fp$scores$geno)])
+qplot(uout$maxpostprob[!is.na(fp$scores$geno)])
+```
+
+I would argue that we are better calibrated than `fitPoly`, even if the genotyping is the same.
+
+
+
