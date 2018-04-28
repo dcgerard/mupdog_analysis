@@ -17,34 +17,61 @@ I make a figure of the sample size needed oracly correctly genotype 95\% of the 
 ```{r}
 library(mupdog)
 library(tidyverse)
-ploidy_seq <- c(2, 4, 6)
-seq        <- 0.001
-bias_seq   <- seq(0.5, 1, length = 20)
-od_seq     <- seq(0, 0.02, length = 20)
-nseq       <- 1:1000
-alpha_seq  <- c(0.5, 0.6, 0.7, 0.8, 0.9, 0.95)
-expand.grid(n      = nseq,
-            ploidy = ploidy_seq,
-            seq    = seq,
-            bias   = bias_seq,
-            od     = od_seq,
-            alpha  = alpha_seq) %>%
-  as_data_frame() ->
-  odat
-odat$pmiss <- NA
-class(odat$pmiss) <- "numeric"
-
-for (index in 1:nrow(odat)) {
-  dist <- stats::dbinom(x = 0:odat$ploidy[index], 
-                        size = odat$ploidy[index], 
-                        prob = odat$alpha[index])
-  odat$pmiss[index] <- oracle_mis(n = odat$n[index], 
-                                  ploidy = odat$ploidy[index], 
-                                  seq = odat$seq[index], 
-                                  bias = odat$bias[index],
-                                  od = odat$od[index], 
-                                  dist = dist)
-}
-saveRDS(object = odat, file = "../output/oracle_explore/odat.RDS")
+odat <- readRDS("../output/oracle_explore/odat.RDS")
 ```
+
+```{r}
+## Function to extract n that has at max pmiss <= err
+get_cutoff <- function(n, pmiss, err = 0.05) {
+  if (all(pmiss > 0.05)) {
+    return(NA)
+  } else {
+    return(min(n[pmiss <= err]))
+  }
+}
+
+maxerr <- 0.05
+odat %>%
+  group_by(ploidy, seq, bias, od, alpha) %>%
+  summarize(min_n = get_cutoff(n = n, pmiss = pmiss, err = maxerr)) %>%
+  ungroup() ->
+  sumdat
+```
+
+```{r}
+keep_od <- seq(0, 0.02, by = 0.002)
+keep_bias <- seq(0.5, 1, by = 0.05)
+
+ploidy_vec <- unique(sumdat$ploidy)
+alpha_vec <- unique(sumdat$alpha)
+
+for(ploidy_index in 1:length(ploidy_vec)) {
+  for(alpha_index in 1:length(alpha_vec)) {
+    alpha_current <- alpha_vec[alpha_index]
+    ploidy_current <- ploidy_vec[ploidy_index]
+    sumdat %>%
+      filter(ploidy == ploidy_current, alpha == alpha_current, od %in% keep_od, 
+             bias %in% keep_bias) %>%
+      ggplot(mapping = aes(x = bias, y = od, fill = log(min_n))) +
+      geom_tile() +
+      scale_fill_gradient(low = "white", high = "steelblue") +
+      theme_bw() +
+      geom_text(aes(label = min_n)) +
+      ylab("Overdispersion") +
+      xlab("Bias") +
+      ggtitle(paste0("Ploidy: ", ploidy_current, ", Allele Freq: ", alpha_current)) + 
+      theme(legend.position = "none") ->
+      pl
+    print(pl)
+    pdf(file = paste0("../output/oracle_explore/n_for_05_alpha", alpha_current * 100, "_ploidy", ploidy_current, ".pdf"), height = 4, width = 5, family = "Times")
+    print(pl)
+    dev.off()
+    
+  }
+}
+
+
+```
+
+
 

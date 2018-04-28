@@ -1,0 +1,72 @@
+---
+title: "fitPoly On Simulated Data"
+author: "David Gerard"
+date: "April 27, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+We use simulated HWE data to see how `fitPoly` compares to `updog`.
+
+# Analysis
+
+```{r, message=FALSE}
+library(updog)
+library(mupdog)
+library(fitPoly)
+library(tidyverse)
+data("snpdat")
+snpdat %>%
+  filter(snp == "SNP1") ->
+  smalldat
+nvec <- smalldat$size
+```
+
+```{r}
+ploidy <- 6
+tgeno <- rgeno(n = length(nvec), ploidy = ploidy, model = "hw", allele_freq = 0.8)
+refvec <- rflexdog(sizevec = nvec, geno = tgeno, ploidy = ploidy, seq = 0.001, bias = 0.7, od = 0.01)
+```
+
+```{r}
+fpdf <- data_frame(MarkerName = "SNP1", SampleName = 1:length(nvec), ratio = refvec / nvec)
+uout <- updog(ocounts = refvec, osize = nvec, ploidy = ploidy, model = "hw")
+fp   <- fitOneMarker(ploidy = ploidy, marker = "SNP1", data = fpdf)
+
+cout <- CodomMarker(y = fpdf$ratio, ng = ploidy + 1, ptype = "p.HW")
+fp_geno <- apply(cout$post, 1, which.max) - 1
+```
+
+```{r}
+plot_geno(ocounts = refvec, osize = nvec, ploidy = ploidy, ogeno = uout$ogeno, 
+          bias_val = uout$bias_val, seq_error = uout$seq_error)
+plot_geno(ocounts = refvec, osize = nvec, ploidy = ploidy, ogeno = fp$scores$maxgeno)
+plot_geno(ocounts = refvec, osize = nvec, ploidy = ploidy, ogeno = fp_geno)
+
+table(uout$ogeno, fp$scores$maxgeno)
+
+1 - mean(uout$maxpostprob)
+1 - mean(fp$scores$maxP)
+
+mean(uout$ogeno != tgeno)
+mean(fp$scores$maxgeno != tgeno)
+mean(fp_geno != tgeno)
+
+```
+
+```{r}
+qplot(log(fp$scores$maxP/(1 - fp$scores$maxP)), log(uout$maxpostprob / (1 - uout$maxpostprob)))  +
+  geom_abline() +
+  xlab("fitPoly: logit maxP") +
+  ylab("updog: logit maxpostprob")
+```
+
+
+
+
+
