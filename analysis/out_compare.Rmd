@@ -1,0 +1,183 @@
+---
+title: "Outlier Comparision between Updog and Mupdog"
+author: "David Gerard"
+date: "May 1, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I compare `flexdog` and `updog` in terms of their outlier estimates. The prob_outlier is mostly the same.
+
+But other summaries are very different (see SNP 3)! 
+This is because flexdog says that you have no genotype if you are an outlier while updog says you have a genotype, but it isn't observed. Very subtle!
+
+That is, `updog` says that given genotype k, you are either BB with mean at k/K or BB from the outlier distribution.
+
+While `flexdog` says that you have genotype k with some probabilitiy or you have no genotype with some probability, and thus follow the outlier distribution.
+
+`updog` seems more philosophically sound, but the genotyping results seem similar.
+
+# Analysis
+```{r, message=FALSE}
+library(updog)
+library(mupdog)
+library(tidyverse)
+data("snpdat")
+```
+
+# SNP 1
+```{r}
+snpdat %>%
+  filter(snp == "SNP1") ->
+  smalldat
+refvec <- smalldat$counts[-1]
+sizevec <- smalldat$size[-1]
+p1ref <- smalldat$counts[1]
+p1size <- smalldat$size[1]
+ploidy <- 6
+fout <- flexdog(refvec   = refvec, 
+                sizevec  = sizevec,
+                ploidy   = ploidy,
+                model    = "s1", 
+                p1ref    = p1ref,
+                p1size   = p1size,
+                outliers = TRUE)
+uout <- updog(ocounts  = refvec, 
+              osize    = sizevec, 
+              ploidy   = ploidy, 
+              model    = "s1", 
+              p1counts = p1ref, 
+              p1size   = p1size)
+```
+
+```{r}
+fout$out_prop
+uout$out_prop
+
+qplot(fout$prob_outlier, uout$prob_out) +
+  geom_abline() +
+  ggtitle("prob outlier")
+
+qplot(uout$maxpostprob, fout$maxpostprob) +
+  geom_abline() +
+  ggtitle("maxpostprob")
+
+qplot(uout$postmean, fout$postmean) +
+  geom_abline() +
+  ggtitle("Post mean")
+
+plot(fout)
+plot(uout, use_colorblind = TRUE)
+```
+
+# SNP 2
+
+```{r}
+snpdat %>%
+  filter(snp == "SNP2") ->
+  smalldat
+refvec <- smalldat$counts[-1]
+sizevec <- smalldat$size[-1]
+p1ref <- smalldat$counts[1]
+p1size <- smalldat$size[1]
+ploidy <- 6
+fout <- flexdog(refvec   = refvec, 
+                sizevec  = sizevec,
+                ploidy   = ploidy,
+                model    = "s1", 
+                p1ref    = p1ref,
+                p1size   = p1size,
+                outliers = TRUE)
+uout <- updog(ocounts  = refvec, 
+              osize    = sizevec, 
+              ploidy   = ploidy, 
+              model    = "s1", 
+              p1counts = p1ref, 
+              p1size   = p1size)
+```
+
+```{r}
+fout$out_prop
+uout$out_prop
+
+qplot(fout$prob_outlier, uout$prob_out) +
+  geom_abline() +
+  ggtitle("prob outlier")
+
+qplot(uout$maxpostprob, fout$maxpostprob) +
+  geom_abline() +
+  ggtitle("maxpostprob")
+
+qplot(uout$postmean, fout$postmean) +
+  geom_abline() +
+  ggtitle("Post mean")
+
+plot(fout)
+plot(uout, use_colorblind = TRUE)
+```
+
+
+# SNP 3
+
+```{r}
+snpdat %>%
+  filter(snp == "SNP3") ->
+  smalldat
+refvec <- smalldat$counts[-1]
+sizevec <- smalldat$size[-1]
+p1ref <- smalldat$counts[1]
+p1size <- smalldat$size[1]
+ploidy <- 6
+fout <- flexdog(refvec   = refvec, 
+                sizevec  = sizevec,
+                ploidy   = ploidy,
+                model    = "s1", 
+                p1ref    = p1ref,
+                p1size   = p1size,
+                outliers = TRUE)
+uout <- updog(ocounts  = refvec, 
+              osize    = sizevec, 
+              ploidy   = ploidy, 
+              model    = "s1", 
+              p1counts = p1ref, 
+              p1size   = p1size)
+```
+
+```{r}
+fout$out_prop
+uout$out_prop
+
+qplot(fout$prob_outlier, uout$prob_out) +
+  geom_abline() +
+  ggtitle("prob outlier")
+
+qplot(uout$maxpostprob, fout$maxpostprob) +
+  geom_abline() +
+  ggtitle("maxpostprob")
+
+qplot(uout$postmean, fout$postmean) +
+  geom_abline() +
+  ggtitle("Post mean")
+
+plot(fout)
+plot(uout, use_colorblind = TRUE)
+```
+
+
+
+
+```{r}
+sweep(x = fout$postmat, MARGIN = 1, STATS = rowSums(fout$postmat), FUN = "/") ->
+  fpostmat
+
+qplot(c(fpostmat), c(uout$postmat)) +
+  geom_abline()
+
+
+```
+

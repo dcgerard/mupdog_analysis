@@ -42,6 +42,8 @@ output:
 * [BB od is estimated near 0 when truth is S1](try_bb_option_flexdog.html). This makes sense since F1 is even *less* dispersed than HWE.
 * [Normal option doesn't work so well on SNP2](norm_flex.html)
 * [Number of samples needed to genotype with 95\% accuracy](oracle_fig.html)
+* [The way `flexdog` handles outliers is so subtly different than the way `updog` handles outliers](out_compare.html). But this can result in large differences
+in the summaries.
 
 # fitPoly
 * [Try `fitPoly` on the Shirasawa data](fit_poly_shir.html). It does just as well in genotyping, but the differences in precision estimates for each individual are very different.
