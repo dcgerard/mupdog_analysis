@@ -1,0 +1,72 @@
+---
+title: "Find a SNP fitPoly Does Poor on in Shirasawa Data"
+author: "David Gerard"
+date: "May 1, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Look at a few SNPs with a large OD and see if `fitPoly` does poorly on one of these.
+
+# Analysis
+
+```{r}
+library(mupdog)
+library(fitPoly)
+library(tidyverse)
+shirdf <- readRDS("../data/shir_features.RDS")
+
+refmat <- read.csv("../../../reproduce_genotyping/Output/shirasawa_snps/example_refcounts.csv")
+sizemat <- read.csv("../../../reproduce_genotyping/Output/shirasawa_snps/example_readcounts.csv")
+ploidy <- 6
+```
+
+```{r}
+index <- 990
+refvec <- refmat[, index]
+sizevec <- sizemat[, index]
+
+plot_geno(refvec = refvec, sizevec = sizevec, ploidy = ploidy)
+
+flexdog(refvec  = refvec[-1], 
+        sizevec = sizevec[-1], 
+        ploidy  = ploidy, 
+        model   = "s1", 
+        p1ref   = refvec[1],
+        p1size  = sizevec[1]) ->
+  fout
+
+fpdf <- data_frame(MarkerName = "SNP",
+                   SampleName = 1:length(refvec),
+                   ratio = refvec / sizevec)
+fitOneMarker(ploidy = ploidy, marker = "SNP", data = fpdf) ->
+  fpout
+```
+
+```{r}
+plot_geno(refvec  = refvec, 
+          sizevec = sizevec, 
+          ploidy  = ploidy, 
+          geno    = fpout$scores$maxgeno)
+
+plot(fout)
+```
+
+
+According to `updog`, this is not a difficult SNP.
+```{r}
+fout$prop_mis
+```
+
+
+Even the OD is pretty small.
+```{r}
+fout$od 
+```
+
+
