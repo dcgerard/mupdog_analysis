@@ -1,0 +1,57 @@
+---
+title: "fitPoly more cor"
+author: "David Gerard"
+date: "May 1, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Explore more of the correlation results here. `updog` always looks the best.
+
+# Analysis
+
+```{r, message=FALSE}
+library(tidyverse)
+dat <- as_data_frame(read.csv("../../../reproduce_genotyping/Output/sims_out/sims_out.csv", row.names = NULL))
+```
+
+
+```{r}
+dat %>%
+  select(allele_freq, od = od_param, bias = bias_val, updog = ucor_pm, fitPoly = fpcor_pm, naive = naive_cor) %>%
+  gather(key = "Method", value = "Correlation", updog, fitPoly, naive) ->
+  smalldat
+
+ggplot(data = smalldat, mapping = aes(x = Method, y = Correlation)) +
+  geom_boxplot() +
+  facet_grid(bias ~ od) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white")) ->
+  pl
+print(pl)
+```
+
+```{r}
+ggplot(data = smalldat, mapping = aes(x = allele_freq, y = Correlation, color = Method)) +
+  geom_point(alpha = 1/5) +
+  facet_grid(bias ~ od) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white")) ->
+  pl
+print(pl)
+```
+
+```{r}
+ggplot(data = smalldat, mapping = aes(x = allele_freq, y = Correlation, color = Method)) +
+  geom_smooth() +
+  facet_grid(bias ~ od) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white")) ->
+  pl
+print(pl)
+```
