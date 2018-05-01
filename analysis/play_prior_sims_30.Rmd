@@ -1,0 +1,139 @@
+---
+title: "Prior Sims Explore"
+author: "David Gerard"
+date: "April 21, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Play with simulation output from prior_sims_30.R.
+
+# Analysis
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+ploidy <- 6
+readRDS("../output/prior_sims_30/sims_out.RDS") %>%
+  as_data_frame() %>%
+  mutate(geno_dist = plyr::revalue(geno_dist, c(uniform="unif"))) ->
+  simsdat
+
+
+simsdat %>% 
+  select(seed:ploidy, contains("pc")) %>%
+  gather(key = "prior", value = "pc", contains("pc")) %>%
+  mutate(prior = stringr::str_replace(prior, "pc_", "")) ->
+  pcdat
+
+simsdat %>% 
+  select(seed:ploidy, contains("epm")) %>%
+  gather(key = "prior", value = "epm", contains("epm")) %>%
+  mutate(prior = stringr::str_replace(prior, "epm_", "")) ->
+  epmdat
+
+simsdat %>% 
+  select(seed:ploidy, contains("od_")) %>%
+  gather(key = "prior", value = "od_est", contains("od_")) %>%
+  mutate(prior = stringr::str_replace(prior, "od_", "")) ->
+  oddat
+
+simsdat %>% 
+  select(seed:ploidy, contains("seq_")) %>%
+  gather(key = "prior", value = "seq_est", contains("seq_")) %>%
+  mutate(prior = stringr::str_replace(prior, "seq_", "")) ->
+  seqdat
+
+simsdat %>% 
+  select(seed:ploidy, contains("bias_")) %>%
+  gather(key = "prior", value = "bias_est", contains("bias_")) %>%
+  mutate(prior = stringr::str_replace(prior, "bias_", "")) ->
+  biasdat
+
+dfdat <- full_join(pcdat, epmdat) %>%
+  full_join(seqdat) %>%
+  full_join(biasdat) %>%
+  full_join(oddat)
+
+dfdat$prior[dfdat$prior == "uniform"] <- "unif"
+```
+
+# Plot the True Prior Distributions
+
+```{r}
+pilist <- readRDS("../output/prior_sims_30/pilist.RDS")
+names(pilist)[names(pilist) == "uniform"] <- "unif"
+dist_vec <- names(pilist)
+
+for (index in 1:length(pilist)) {
+  pidat <- data_frame(x = 0:ploidy, xend = 0:ploidy, yend = pilist[[index]])
+  pidat$y <- 0
+  pl <- ggplot(data = pidat, mapping = aes(x = x, xend = xend, y = y, yend = yend)) +
+    geom_segment(lineend = "round", lwd = 2) +
+    xlab("Genotype") +
+    ylab("Frequency") +
+    ylim(0, 0.5) +
+    theme_bw()
+  pdf(file = paste0("../output/prior_sims_30/priors/prior_", dist_vec[index], ".pdf"),
+      family = "Times", height = 3, width = 4.3)
+  print(pl)
+  dev.off()
+  
+  pidat$prior <- dist_vec[index]
+  if (index == 1) {
+    fullpidat <- pidat
+  } else {
+    fullpidat <- bind_rows(fullpidat, pidat)
+  }
+}
+
+fullpidat <- filter(fullpidat, prior != "unif")
+
+pl <- ggplot(data = fullpidat, mapping = aes(x = x, xend = xend, y = y, yend = yend)) +
+  geom_segment(lineend = "round", lwd = 1) +
+  xlab("Genotype") +
+  ylab("Frequency") +
+  theme_bw() +
+  facet_wrap(~prior) +
+  theme(strip.background = element_rect(fill = "white")) +
+  scale_x_continuous(breaks = 0:ploidy)
+pdf(file = "../output/prior_sims_30/priors/all_priors.pdf",
+    family = "Times", height = 3, width = 4.3)
+print(pl)
+dev.off()
+```
+
+
+```{r}
+colvec <- colorblind_pal()(5)
+for (index in 1:length(dist_vec)) {
+  
+  pl <- dfdat %>%
+    filter(geno_dist == dist_vec[index]) %>%
+    mutate(true = (prior == dist_vec[index])) %>%
+    ggplot(mapping = aes(x = prior, y = pc, fill = true, color = true)) +
+    geom_boxplot(outlier.size = 0.2, lwd = 0.2) +
+    facet_grid(bias ~ od) +
+    theme_bw() +
+    theme(strip.background = element_rect(fill = "white"),
+          axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+          legend.position = "none") +
+    scale_color_manual(values = colvec[1:2]) +
+    scale_fill_manual(values = colvec[c(3, 5)]) +
+    ylab("Proportion Correct") +
+    xlab("Assumed Prior") +
+    ggtitle(paste0("Truth = ", dist_vec[index])) +
+    ylim(0, 1)
+  pdf(file = paste0("../output/prior_sims_30/pc/pc_", dist_vec[index], ".pdf"),
+      family = "Times", height = 3, width = 4.3)
+  print(pl)  
+  dev.off()
+}
+```
+
+
