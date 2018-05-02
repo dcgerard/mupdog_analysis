@@ -1,0 +1,56 @@
+---
+title: "Reconcile Updog with Flexdog"
+author: "David Gerard"
+date: "May 1, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I reconcile the outlier results of `updog` and `flexdog`.
+
+# Analysis
+
+```{r, message=FALSE}
+library(updog)
+library(mupdog)
+library(tidyverse)
+data("snpdat")
+```
+
+```{r}
+snpdat %>%
+  filter(snp == "SNP3") ->
+  smalldat
+refvec <- smalldat$counts[-1]
+sizevec <- smalldat$size[-1]
+p1ref <- smalldat$counts[1]
+p1size <- smalldat$size[1]
+ploidy <- 6
+fout <- flexdog(refvec   = refvec, 
+                sizevec  = sizevec,
+                ploidy   = ploidy,
+                model    = "s1", 
+                p1ref    = p1ref,
+                p1size   = p1size,
+                outliers = TRUE)
+uout <- updog(ocounts  = refvec, 
+              osize    = sizevec, 
+              ploidy   = ploidy, 
+              model    = "s1", 
+              p1counts = p1ref, 
+              p1size   = p1size)
+```
+
+```{r}
+index <- 3
+uout$postmat[index, ]
+
+fout$
+```
+
+
