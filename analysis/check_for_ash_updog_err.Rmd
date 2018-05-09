@@ -1,0 +1,73 @@
+---
+title: "Check for Errors in ASH Updog Code"
+author: "David Gerard"
+date: "May 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I play around with the functions important for the `"ash"` option in `updog`.
+
+# Analysis
+
+```{r}
+library(tidyverse)
+library(updog)
+data("snpdat")
+
+ploidy <- 4
+pivec <- runif(ploidy + 1)
+pivec <- pivec / sum(pivec)
+modeval <- 1.5
+pk <- updog:::get_probk_vec(pivec = pivec, model = "ash", mode = modeval)
+
+pivec
+pk
+
+plot(0:ploidy, pk, type = "h", ylim = c(0, max(pk)), 
+     xlab = "Allele Dosage", ylab = "prob")
+
+temp <- updog:::get_uni_rep(probvec = pk)
+assertthat::are_equal(pivec, temp$pivec)
+```
+
+```{r}
+snpdat %>%
+  filter(snp == "SNP2") ->
+  smalldat
+
+refvec <- smalldat$counts
+sizevec <- smalldat$size
+ploidy <- 6
+
+aout <- flexdog_full(refvec = refvec, sizevec = sizevec,
+                     ploidy = ploidy, model = "ash")
+fout <- flexdog(refvec = refvec, sizevec = sizevec,
+                ploidy = ploidy, model = "f1")
+flexout <- flexdog(refvec = refvec, sizevec = sizevec, 
+                   ploidy = ploidy, model = "flex")
+
+## This should not happen
+## ASH should have a likelihood between flexout and fout.
+aout$llike
+fout$llike
+flexout$llike
+
+aout2 <- flexdog_full(refvec = refvec, sizevec = sizevec, 
+                      ploidy = ploidy, model = "ash", ashpen = 0, 
+                      bias = fout$bias, od = fout$od, seq = fout$seq,
+                      update_bias = FALSE, update_od = FALSE, 
+                      update_seq = FALSE) 
+
+## This is better!
+flexout$llike
+aout2$llike
+fout$llike
+```
+
+

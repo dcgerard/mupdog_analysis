@@ -1,0 +1,94 @@
+---
+title: "Explore Weird Genotyping"
+author: "David Gerard"
+date: "May 7, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I reproduce the results from Felipe's friend and try to see what's going on.
+
+# Analysis
+
+```{r}
+library(updog)
+load("../data/weird_genotyping/test.RData")
+
+### Mean depth 50
+
+n.mks <- 76
+n.ind <- 150
+
+geno_matrix <- matrix(rep(NA,n.ind*n.mks),nrow=n.mks)
+P1 <- P2 <- rep(NA, n.mks)
+
+## This seems to be the worst SNP.
+for (i in 1:n.mks) {
+  cat("Index", i, "\n")
+  up <-  updog::flexdog(refvec  = oref[i,], 
+                        sizevec = osize[i,], 
+                        ploidy  = 2,
+                        p1ref   = pref[i,1],
+                        p1size  = psize[i,1],
+                        p2ref   = pref[i,2],
+                        p2size  = psize[i,2],
+                        model   = "f1",
+                        verbose = FALSE)
+
+  P1[i] <- up$par$p1geno
+  P2[i] <- up$par$p2geno
+
+  geno_matrix[i,] <- up$geno
+}
+```
+
+
+
+
+```{r}
+alt <- psize-pref
+
+# The function no longer estimates all P2 genotypes as homozygotes for reference allele
+P2
+```
+
+```{r}
+# Mean depth 2
+load("../data/weird_genotyping/test2.RData")
+
+n.mks <- 81
+n.ind <- 150
+
+geno_matrix.1 <- matrix(rep(NA,n.ind*n.mks),nrow=n.mks)
+P1.1 <- P2.1 <- rep(NA, n.mks)
+
+for(i in 1:n.mks){
+  cat("Index", i, "\n")
+  up <-  updog::flexdog(refvec  = oref[i,],
+                        sizevec = osize[i,], 
+                        ploidy  = 2,
+                        p1ref   = pref[i,1],
+                        p1size  = psize[i,1],
+                        p2ref   = pref[i,2],
+                        p2size  = psize[i,2],
+                        model   = "f1",
+                        verbose = FALSE)
+  
+  P1.1[i] <-up$par$p1geno
+  P2.1[i] <- up$par$p2geno
+  
+  geno_matrix.1[i,] <- up$geno
+}
+```
+
+```{r}
+alt <- psize-pref
+
+# The function estimates all P2 genotypes as homozygotes for reference allele
+P2.1
+```

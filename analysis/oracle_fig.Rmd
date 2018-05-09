@@ -13,17 +13,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 I make a figure of the sample size needed oracly correctly genotype 95\% of the individuals under different priors, od, and bias.
 
-# Figure
+# Figures
 ```{r}
-library(mupdog)
+library(updog)
 library(tidyverse)
 odat <- readRDS("../output/oracle_explore/odat.RDS")
 ```
 
+## Misclassification Error Rate Read-Depth
+
 ```{r}
 ## Function to extract n that has at max pmiss <= err
 get_cutoff <- function(n, pmiss, err = 0.05) {
-  if (all(pmiss > 0.05)) {
+  if (all(pmiss > err)) {
     return(NA)
   } else {
     return(min(n[pmiss <= err]))
@@ -39,9 +41,6 @@ odat %>%
 ```
 
 ```{r}
-keep_od <- seq(0, 0.02, by = 0.002)
-keep_bias <- seq(0.5, 1, by = 0.05)
-
 ploidy_vec <- unique(sumdat$ploidy)
 alpha_vec <- unique(sumdat$alpha)
 
@@ -50,8 +49,7 @@ for(ploidy_index in 1:length(ploidy_vec)) {
     alpha_current <- alpha_vec[alpha_index]
     ploidy_current <- ploidy_vec[ploidy_index]
     sumdat %>%
-      filter(ploidy == ploidy_current, alpha == alpha_current, od %in% keep_od, 
-             bias %in% keep_bias) %>%
+      filter(ploidy == ploidy_current, alpha == alpha_current) %>%
       ggplot(mapping = aes(x = bias, y = od, fill = log(min_n))) +
       geom_tile() +
       scale_fill_gradient(low = "white", high = "steelblue") +
@@ -73,5 +71,54 @@ for(ploidy_index in 1:length(ploidy_vec)) {
 
 ```
 
+## Correlation Read-Depth
 
+```{r}
+## Function to extract n that has at max pmiss <= err
+get_cutoff <- function(n, cor, mincor = 0.9) {
+  if (all(cor < mincor)) {
+    return(NA)
+  } else {
+    return(min(n[cor >= mincor]))
+  }
+}
+
+mincor <- 0.9
+odat %>%
+  group_by(ploidy, seq, bias, od, alpha) %>%
+  summarize(min_n = get_cutoff(n = n, cor = cor, mincor = mincor)) %>%
+  ungroup() ->
+  sumdat
+
+```
+
+
+```{r}
+ploidy_vec <- unique(sumdat$ploidy)
+alpha_vec <- unique(sumdat$alpha)
+
+for(ploidy_index in 1:length(ploidy_vec)) {
+  for(alpha_index in 1:length(alpha_vec)) {
+    alpha_current <- alpha_vec[alpha_index]
+    ploidy_current <- ploidy_vec[ploidy_index]
+    sumdat %>%
+      filter(ploidy == ploidy_current, alpha == alpha_current) %>%
+      ggplot(mapping = aes(x = bias, y = od, fill = log(min_n))) +
+      geom_tile() +
+      scale_fill_gradient(low = "white", high = "steelblue") +
+      theme_bw() +
+      geom_text(aes(label = min_n)) +
+      ylab("Overdispersion") +
+      xlab("Bias") +
+      ggtitle(paste0("Ploidy: ", ploidy_current, ", Allele Freq: ", alpha_current)) + 
+      theme(legend.position = "none") ->
+      pl
+    print(pl)
+    pdf(file = paste0("../output/oracle_explore/cor_n_for_05_alpha", alpha_current * 100, "_ploidy", ploidy_current, ".pdf"), height = 4, width = 5, family = "Times")
+    print(pl)
+    dev.off()
+    
+  }
+}
+```
 
