@@ -2,7 +2,6 @@
 ## Same as prior_sims.R except only have 50 individuals
 library(updog)
 library(tidyverse)
-library(mupdog)
 library(fitPoly)
 data("snpdat")
 nvec <- rep(100, length = 30)
@@ -47,33 +46,57 @@ parlist <- split(parvals, seq(nrow(parvals)))
 
 one_rep <- function(args, nvec, pilist) {
   set.seed(args$seed)
-  pivec <- pilist[[args$geno_dist]]
-  geno <- mupdog::rgeno(n = length(nvec), ploidy = args$ploidy, model = "flex", pivec = pivec)
-  refvec <- mupdog::rflexdog(sizevec = nvec, geno = geno, ploidy = args$ploidy, seq = args$seq, bias = args$bias, od = args$od)
+  pivec  <- pilist[[args$geno_dist]]
+  geno   <- updog::rgeno(n      = length(nvec),
+                         ploidy = args$ploidy,
+                         model  = "flex",
+                         pivec  = pivec)
+  refvec <- updog::rflexdog(sizevec = nvec,
+                            geno    = geno,
+                            ploidy  = args$ploidy,
+                            seq     = args$seq,
+                            bias    = args$bias,
+                            od      = args$od)
 
-  bias_init_vec <- exp(c(-0.7, -0.3, 0, 0.3, 0.7))
-  lbest_vec <- rep(-Inf, length = 7)
   mout <- list()
-  mout_temp <-  list()
-  for (fit_index in 1:length(bias_init_vec)) {
-    ## Fit methods
-    mout_temp[[1]] <- mupdog::flexdog(refvec = refvec, sizevec = nvec, ploidy = args$ploidy, model = "hw", verbose = FALSE, bias = bias_init_vec[fit_index])
-    mout_temp[[2]] <- mupdog::flexdog(refvec = refvec, sizevec = nvec, ploidy = args$ploidy, model = "bb", verbose = FALSE, bias = bias_init_vec[fit_index])
-    mout_temp[[3]] <- mupdog::flexdog(refvec = refvec, sizevec = nvec, ploidy = args$ploidy, model = "norm", verbose = FALSE, bias = bias_init_vec[fit_index])
-    mout_temp[[4]] <- mupdog::flexdog(refvec = refvec, sizevec = nvec, ploidy = args$ploidy, model = "ash", verbose = FALSE, bias = bias_init_vec[fit_index])
-    mout_temp[[5]] <- mupdog::flexdog(refvec = refvec, sizevec = nvec, ploidy = args$ploidy, model = "f1", verbose = FALSE, bias = bias_init_vec[fit_index])
-    mout_temp[[6]] <- mupdog::flexdog(refvec = refvec, sizevec = nvec, ploidy = args$ploidy, model = "flex", verbose = FALSE, bias = bias_init_vec[fit_index])
-    suppressWarnings(mout_temp[[7]] <- mupdog::flexdog(refvec = refvec, sizevec = nvec, ploidy = args$ploidy, model = "uniform", verbose = FALSE, bias = bias_init_vec[fit_index]))
 
-    ## Choose highest likelihood
-    for (mindex in 1:length(mout_temp)) {
-     if (mout_temp[[mindex]]$llike > lbest_vec[mindex]) {
-       mout[[mindex]] <- mout_temp[[mindex]]
-       lbest_vec[mindex] <- mout_temp[[mindex]]$l
-     }
-    }
-  }
-
+  mout[[1]] <- updog::flexdog(refvec = refvec,
+                              sizevec = nvec,
+                              ploidy = args$ploidy,
+                              model = "hw",
+                              verbose = FALSE)
+  mout[[2]] <- updog::flexdog(refvec = refvec,
+                              sizevec = nvec,
+                              ploidy = args$ploidy,
+                              model = "bb",
+                              verbose = FALSE)
+  mout[[3]] <- updog::flexdog(refvec = refvec,
+                              sizevec = nvec,
+                              ploidy = args$ploidy,
+                              model = "norm",
+                              verbose = FALSE)
+  mout[[4]] <- updog::flexdog(refvec = refvec,
+                              sizevec = nvec,
+                              ploidy = args$ploidy,
+                              model = "ash",
+                              verbose = FALSE)
+  mout[[5]] <- updog::flexdog(refvec = refvec,
+                              sizevec = nvec,
+                              ploidy = args$ploidy,
+                              model = "f1",
+                              verbose = FALSE)
+  mout[[6]] <- updog::flexdog(refvec = refvec,
+                              sizevec = nvec,
+                              ploidy = args$ploidy,
+                              model = "flex",
+                              verbose = FALSE)
+  suppressWarnings(
+  mout[[7]] <- updog::flexdog(refvec = refvec,
+                              sizevec = nvec,
+                              ploidy = args$ploidy,
+                              model = "uniform",
+                              verbose = FALSE)
+  )
   ## Compare to fitPoly
   ## Won't run with too few samples
   # tempdf <- data.frame(MarkerName = "SNP",

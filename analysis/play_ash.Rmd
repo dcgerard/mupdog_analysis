@@ -1,0 +1,86 @@
+---
+title: "Play with New Unimodal Opt"
+author: "David Gerard"
+date: "May 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I play around with the new unimodal optimization
+
+```{r, message=FALSE}
+library(tidyverse)
+library(updog)
+data("snpdat")
+ploidy <- 6
+```
+
+```{r}
+snpdat %>%
+  filter(snp == "SNP1") ->
+  smalldat
+refvec <- smalldat$counts
+sizevec <- smalldat$size
+aout <- flexdog(refvec  = refvec,
+                sizevec = sizevec, 
+                ploidy  = ploidy, 
+                model   = "ash")
+plot(aout)
+```
+
+```{r}
+snpdat %>%
+  filter(snp == "SNP2") ->
+  smalldat
+refvec <- smalldat$counts
+sizevec <- smalldat$size
+aout <- flexdog(refvec  = refvec,
+                sizevec = sizevec, 
+                ploidy  = ploidy, 
+                model   = "ash")
+plot(aout)
+```
+
+```{r}
+snpdat %>%
+  filter(snp == "SNP3") ->
+  smalldat
+refvec <- smalldat$counts
+sizevec <- smalldat$size
+aout <- flexdog(refvec  = refvec,
+                sizevec = sizevec, 
+                ploidy  = ploidy, 
+                model   = "ash")
+plot(aout)
+```
+
+
+```{r}
+true_geno <- rgeno(n      = length(sizevec), 
+                   ploidy = ploidy,
+                   model  = "f1", 
+                   p1geno = 4,
+                   p2geno = 3)
+refvec <- rflexdog(sizevec = sizevec, 
+                   geno    = true_geno, 
+                   ploidy  = ploidy, 
+                   seq     = 0.001, 
+                   bias    = 0.6,
+                   od      = 0.01)
+asout <- flexdog(refvec  = refvec,
+                 sizevec = sizevec, 
+                 ploidy  = ploidy, 
+                 model   = "ash")
+
+flexout <- flexdog(refvec  = refvec,
+                 sizevec = sizevec, 
+                 ploidy  = ploidy, 
+                 model   = "flex")
+plot(asout)
+plot(flexout)
+```

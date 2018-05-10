@@ -1,0 +1,68 @@
+---
+title: "Joint Dist of Est and Geno in Tetraploid"
+author: "David Gerard"
+date: "May 10, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Plot joint distribution of oracle estimator with true genotype in related tetraploids with small read-depth.
+
+# Analysis
+```{r, message=FALSE}
+library(tidyverse)
+library(updog)
+dist_fig <- function(mat) {
+  mat_text <- format(round(mat, digits = 2), digits = 2)
+  stringr::str_replace(mat_text, "0.00", "0") %>%
+    stringr::str_replace("0\\.", "\\.") ->
+    probability_text
+  expand.grid(x = seq_len(nrow(mat)) - 1, y = seq_len(nrow(mat)) - 1) %>%
+    cbind(probability_text, probability = c(mat)) ->
+    dfdat
+  
+  omiss <- oracle_mis_from_joint(jd = mat)
+  ocorr <- oracle_cor_from_joint(jd = mat)
+  
+  ggplot(data = dfdat, mapping = aes(x = x, y = y, fill = probability)) +
+    geom_tile() +
+    geom_text(aes(label = probability_text)) +
+    xlab("yhat") +
+    ylab("y") +
+    ggtitle(paste0("Misclassification Error Rate: ", 
+                   round(omiss, digits = 3), 
+                   "\nCorrelation: ", 
+                   round(ocorr, digits = 3))) +
+    scale_fill_gradient2() +
+    theme_bw() ->
+    pl
+  return(pl)
+}
+```
+
+
+
+```{r}
+ploidy <- 4
+seq    <- 0.001
+bias   <- 0.9
+od     <- 0.007
+p1geno <- 3
+p2geno <- 2
+dist   <- get_q_array(ploidy = ploidy)[p1geno + 1, p2geno + 1, ]
+depth  <- 10
+jd <- oracle_joint(n = depth, 
+                   ploidy = ploidy,
+                   seq = seq, 
+                   bias = bias,
+                   od = od, 
+                   dist = dist)
+jd[is.nan(jd)] <- 0
+dist_fig(jd)
+```
+

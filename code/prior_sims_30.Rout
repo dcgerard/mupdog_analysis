@@ -1,0 +1,184 @@
+
+R version 3.4.4 (2018-03-15) -- "Someone to Lean On"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+R> ## Simulation code for comparing the various priors
+R> ## Same as prior_sims.R except only have 50 individuals
+R> library(updog)
+R> library(tidyverse)
+── Attaching packages ─────────────────────────────────────── tidyverse 1.2.1 ──
+✔ ggplot2 2.2.1     ✔ purrr   0.2.4
+✔ tibble  1.4.2     ✔ dplyr   0.7.4
+✔ tidyr   0.8.0     ✔ stringr 1.3.0
+✔ readr   1.1.1     ✔ forcats 0.3.0
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+R> library(fitPoly)
+R> data("snpdat")
+R> nvec <- rep(100, length = 30)
+R> 
+R> mean_val <- 4.5
+R> 
+R> ploidy      <- 6
+R> allele_freq <- mean_val / ploidy
+R> p1geno      <- 4
+R> p2geno      <- 5
+R> bb_od       <- 0.1
+R> mu          <- mean_val
+R> sigma       <- 0.5 ## sd of binomial is about 1.061, so underdispersed here.
+R> 
+R> pilist <- list()
+R> pilist[[1]] <- dbinom(x = 0:ploidy, size = ploidy, prob = allele_freq)
+R> pilist[[2]] <- dbetabinom(x = 0:ploidy, size = ploidy, mu = allele_freq, rho = bb_od, log = FALSE)
+R> pilist[[3]] <- dnorm(x = 0:ploidy, mean = mu, sd = sigma)
+R> pilist[[3]] <- pilist[[3]] / sum(pilist[[3]])
+R> pilist[[4]] <- 0:ploidy
+R> pilist[[4]] <- pilist[[4]] / sum(pilist[[4]])
+R> pilist[[5]] <- updog::get_q_array(ploidy = ploidy)[p1geno + 1, p2geno + 1, ]
+R> pilist[[6]] <- c(1, 4, 1, 4, 1, 4, 8)
+R> pilist[[6]] <- pilist[[6]] / sum(pilist[[6]])
+R> pilist[[7]] <- rep(1 / (ploidy + 1), length = ploidy + 1)
+R> pinames <- c("hw", "bb", "norm", "ash", "f1", "flex", "uniform")
+R> names(pilist) <- pinames
+R> 
+R> saveRDS(object = pilist, file = "../output/prior_sims_30/pilist.RDS")
+R> 
+R> seq <- 0.001
+R> odvec <- c(0, 0.005, 0.01)
+R> biasvec <- c(1, 0.75, 0.5)
+R> itermax <- 500
+R> 
+R> parvals <- expand.grid(seed = 1:itermax, od = odvec, bias = biasvec, geno_dist = pinames)
+R> parvals$seq <- seq
+R> parvals$ploidy <- ploidy
+R> set.seed(1)
+R> parvals <- parvals[sample(1:nrow(parvals)), ] ## randomize order so heavy computation doesn't cluster together
+R> parlist <- split(parvals, seq(nrow(parvals)))
+R> 
+R> one_rep <- function(args, nvec, pilist) {
+...   set.seed(args$seed)
+...   pivec  <- pilist[[args$geno_dist]]
+...   geno   <- updog::rgeno(n      = length(nvec),
+...                          ploidy = args$ploidy,
+...                          model  = "flex",
+...                          pivec  = pivec)
+...   refvec <- updog::rflexdog(sizevec = nvec,
+...                             geno    = geno,
+...                             ploidy  = args$ploidy,
+...                             seq     = args$seq,
+...                             bias    = args$bias,
+...                             od      = args$od)
+... 
+...   mout <- list()
+... 
+...   mout[[1]] <- updog::flexdog(refvec = refvec,
+...                               sizevec = nvec,
+...                               ploidy = args$ploidy,
+...                               model = "hw",
+...                               verbose = FALSE)
+...   mout[[2]] <- updog::flexdog(refvec = refvec,
+...                               sizevec = nvec,
+...                               ploidy = args$ploidy,
+...                               model = "bb",
+...                               verbose = FALSE)
+...   mout[[3]] <- updog::flexdog(refvec = refvec,
+...                               sizevec = nvec,
+...                               ploidy = args$ploidy,
+...                               model = "norm",
+...                               verbose = FALSE)
+...   mout[[4]] <- updog::flexdog(refvec = refvec,
+...                               sizevec = nvec,
+...                               ploidy = args$ploidy,
+...                               model = "ash",
+...                               verbose = FALSE)
+...   mout[[5]] <- updog::flexdog(refvec = refvec,
+...                               sizevec = nvec,
+...                               ploidy = args$ploidy,
+...                               model = "f1",
+...                               verbose = FALSE)
+...   mout[[6]] <- updog::flexdog(refvec = refvec,
+...                               sizevec = nvec,
+...                               ploidy = args$ploidy,
+...                               model = "flex",
+...                               verbose = FALSE)
+...   suppressWarnings(
+...   mout[[7]] <- updog::flexdog(refvec = refvec,
+...                               sizevec = nvec,
+...                               ploidy = args$ploidy,
+...                               model = "uniform",
+...                               verbose = FALSE)
+...   )
+...   ## Compare to fitPoly
+...   ## Won't run with too few samples
+...   # tempdf <- data.frame(MarkerName = "SNP",
+...   #                      SampleName = 1:length(nvec),
+...   #                      ratio = refvec / nvec)
+...   # fpout <- fitPoly::fitOneMarker(ploidy = ploidy,
+...   #                                marker = "SNP",
+...   #                                data = tempdf)
+... 
+...   ## Save output
+...   pc_vec <- rep(NA, length = length(mout))
+...   names(pc_vec) <- paste0("pc_", names(pilist))
+... 
+...   epm_vec <- rep(NA, length = length(mout))
+...   names(epm_vec) <- paste0("epm_", names(pilist))
+... 
+...   seq_vec <- rep(NA, length = length(mout))
+...   names(seq_vec) <- paste0("seq_", names(pilist))
+... 
+...   bias_vec <- rep(NA, length = length(mout))
+...   names(bias_vec) <- paste0("bias_", names(pilist))
+... 
+...   od_vec <- rep(NA, length = length(mout))
+...   names(od_vec) <- paste0("od_", names(pilist))
+... 
+...   for (index in 1:length(mout)) {
+...     pc_vec[index]   <- mean(mout[[index]]$geno == geno)
+...     seq_vec[index]  <- mout[[index]]$seq
+...     bias_vec[index] <- mout[[index]]$bias
+...     od_vec[index]   <- mout[[index]]$od
+...     epm_vec[index]  <- mout[[index]]$prop_mis
+...   }
+... 
+...   return_vec <- c(pc_vec, epm_vec, seq_vec, bias_vec, od_vec)
+... 
+...   return(return_vec)
+... }
+R> 
+R> 
+R> library(parallel)
+R> nc <- 6
+R> cl   <- makeCluster(nc)
+R> cat("Running multithreaded computations with", nc, "threads.\n")
+Running multithreaded computations with 6 threads.
+R> sout <- t(parallel::parSapply(cl = cl, X = parlist, FUN = one_rep,
+...                               nvec = nvec, pilist = pilist))
+R> stopCluster(cl)
+R> 
+R> outtab <- cbind(parvals, sout)
+R> saveRDS(object = outtab, file = "../output/prior_sims_30/sims_out.RDS")
+R> 
+R> 
+R> 
+> proc.time()
+     user    system   elapsed 
+   19.496     0.848 72925.763 

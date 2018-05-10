@@ -129,6 +129,7 @@ for (index in 1:length(dist_vec)) {
     xlab("Assumed Prior") +
     ggtitle(paste0("Truth = ", dist_vec[index])) +
     ylim(0, 1)
+  print(pl)
   pdf(file = paste0("../output/prior_sims_30/pc/pc_", dist_vec[index], ".pdf"),
       family = "Times", height = 3, width = 4.3)
   print(pl)  

@@ -54,19 +54,8 @@ flexout <- flexdog(refvec = refvec, sizevec = sizevec,
 
 ## This should not happen
 ## ASH should have a likelihood between flexout and fout.
+flexout$llike
 aout$llike
-fout$llike
-flexout$llike
-
-aout2 <- flexdog_full(refvec = refvec, sizevec = sizevec, 
-                      ploidy = ploidy, model = "ash", ashpen = 0, 
-                      bias = fout$bias, od = fout$od, seq = fout$seq,
-                      update_bias = FALSE, update_od = FALSE, 
-                      update_seq = FALSE) 
-
-## This is better!
-flexout$llike
-aout2$llike
 fout$llike
 ```
 
