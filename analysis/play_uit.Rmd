@@ -1,0 +1,75 @@
+---
+title: "Play with Uit"
+author: "David Gerard"
+date: "May 11, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I play around with the Uitdewilligen data
+
+# Analysis
+
+## Extract SNPs
+
+I use `vcfR`.
+
+```{r}
+library(vcfR)
+
+uit <- read.vcfR(file = "../data/uit_raw/NewPlusOldCalls.headed.vcf")
+
+## DP = read-depth
+## AA = alternative allele
+## GT = genotype
+## GQ = genotype quality
+## GL = log-10 scaled likelihood of genotype
+## RA = reference allele
+## DP = read-depth
+refmat  <- extract.gt(uit, element = "RA")
+class(refmat) <- "numeric"
+altmat  <- extract.gt(uit, element = "AA")
+class(altmat) <- "numeric"
+sizemat <- extract.gt(uit, element = "DP")
+class(sizemat) <- "numeric"
+```
+
+```{r}
+which_biggest <- order(apply(sizemat, 1, median), decreasing = TRUE)
+```
+
+```{r}
+library(updog)
+index <- which_biggest[5000]
+ploidy <- 4
+plot_geno(refvec = refmat[index, ], sizevec = sizemat[index, ], ploidy = ploidy)
+
+uout1 <- flexdog(refvec  = refmat[index, ], 
+                 sizevec = sizemat[index, ], 
+                 ploidy  = ploidy,
+                 model = "norm")
+
+uout2 <- flexdog(refvec  = refmat[index, ], 
+                 sizevec = sizemat[index, ], 
+                 ploidy  = ploidy, 
+                 model   = "flex")
+plot(uout1)
+plot(uout2)
+```
+
+```{r}
+index <- which_biggest[133010]
+ploidy <- 4
+
+uout <- flexdog(refvec  = refmat[index, ], 
+                sizevec = sizemat[index, ], 
+                ploidy  = ploidy, model = "flex")
+plot(uout)
+```
+
+

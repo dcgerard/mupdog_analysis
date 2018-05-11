@@ -23,7 +23,7 @@ https://doi.org/10.1371/journal.pone.0062355
 ```{r, eval=FALSE}
 library(vcfR)
 
-uit <- read.vcfR(file = "~/Data/uitdewilligen_raw_data/NewPlusOldCalls.headed.vcf")
+uit <- read.vcfR(file = "../data/uit_raw/NewPlusOldCalls.headed.vcf")
 
 ## DP = read-depth
 ## AA = alternative allele
