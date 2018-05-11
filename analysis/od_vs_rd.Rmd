@@ -1,0 +1,38 @@
+---
+title: "OD vs Read Depth"
+author: "David Gerard"
+date: "May 11, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+A plot of od vs median read-depth.
+
+# Figure
+
+```{r}
+library(tidyverse)
+shirdat <- readRDS("../../../reproduce_genotyping/Output/shirasawa_snps/shir_features.RDS")
+shirdat <- shirdat[-4, ] ## get rid of high leverage point
+
+ggplot(data = shirdat, mapping = aes(x = med_depth, y = od)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+ggplot(data = shirdat, mapping = aes(x = log(med_depth), y = od)) +
+  geom_point() +
+  geom_smooth(se = FALSE)
+
+lmout <- lm(shirdat$med_depth ~ shirdat$od)
+summary(lmout)
+
+shirdat$groups <- cut(x = shirdat$med_depth, breaks = seq(150, 600, by = 50))
+ggplot(data = shirdat, mapping = aes(x = groups, y = od)) +
+  geom_boxplot()
+```
+

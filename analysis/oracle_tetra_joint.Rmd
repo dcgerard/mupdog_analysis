@@ -66,3 +66,21 @@ jd[is.nan(jd)] <- 0
 dist_fig(jd)
 ```
 
+```{r}
+ploidy <- 4
+seq    <- 0.001
+bias   <- 0.5
+od     <- 0.01
+p1geno <- 4
+p2geno <- 3
+dist   <- get_q_array(ploidy = ploidy)[p1geno + 1, p2geno + 1, ]
+depth  <- 10
+jd <- oracle_joint(n = depth, 
+                   ploidy = ploidy,
+                   seq = seq, 
+                   bias = bias,
+                   od = od, 
+                   dist = dist)
+jd[is.nan(jd)] <- 0
+dist_fig(jd)
+```
