@@ -47,6 +47,9 @@ output:
 * [Joint dist with oracle for small read-depth tetraploid](oracle_tetra_joint.html)
 * [Relationship between read-depth and overdispersion estimates in shirasawa data](od_vs_rd.html).
 * [See how various priors behave on uitdewilligen data](play_uit.html). The flex prior works well sometimes and sometimes works horribly.
+* [See how the calls made by uit differ from the calls made by `updog`](uit_compare_variants.html)
+* [Play around with the Rocher et al data that compares 454 with GBS](rocher_play.html)
+* [Proof of concept that `vcfdog` works](vcfdog_test.html)
 
 # fitPoly
 * [Try `fitPoly` on the Shirasawa data](fit_poly_shir.html). It does just as well in genotyping, but the differences in precision estimates for each individual are very different.

@@ -1,0 +1,102 @@
+---
+title: "Uit Variants"
+author: "David Gerard"
+date: "May 11, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE}
+library(tidyverse)
+library(updog)
+vnts <- read.csv("../data/uit_raw/CSV-file S1 - Sequence variants filtered DP15.csv", sep = ";")
+
+select(vnts, Variant.name, P1PEM01:P7PEM12) ->
+  calldat
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(vcfR)
+
+uit <- read.vcfR(file = "../data/uit_raw/NewPlusOldCalls.headed.vcf")
+
+## DP = read-depth
+## AA = alternative allele
+## GT = genotype
+## GQ = genotype quality
+## GL = log-10 scaled likelihood of genotype
+## RA = reference allele
+## DP = read-depth
+refmat  <- extract.gt(uit, element = "RA")
+class(refmat) <- "numeric"
+altmat  <- extract.gt(uit, element = "AA")
+class(altmat) <- "numeric"
+sizemat <- extract.gt(uit, element = "DP")
+class(sizemat) <- "numeric"
+```
+
+
+```{r}
+index <- 25538
+ploidy <- 4
+uout <- flexdog(refvec  = refmat[index, ], 
+                sizevec = sizemat[index, ], 
+                ploidy  = ploidy,
+                model   = "norm")
+pl <- plot(uout)
+print(pl)
+
+uitcall <- as.numeric(unlist(calldat[index, -1]))
+table(4 - uout$geno, uitcall)
+
+uitcall[is.na(uitcall)] <- -1
+diffvec <- 4 - uout$geno  != uitcall
+uout$maxpostprob[diffvec]
+uout$input$sizevec[diffvec]
+
+pl <- plot_geno(refvec = uout$input$refvec, sizevec = uout$input$sizevec, ploidy = ploidy, geno = diffvec * 1) +
+  guides(color=guide_legend(title="Agree?"))
+print(pl)
+```
+
+
+```{r}
+set.seed(1)
+indexvec <- sample(1:nrow(refmat), size = 20)
+
+for (index in indexvec) {
+  ploidy <- 4
+  
+  ## updog
+  uout <- flexdog(refvec  = refmat[index, ], 
+                  sizevec = sizemat[index, ], 
+                  ploidy  = ploidy,
+                  model   = "norm", 
+                  verbose = FALSE)
+  pl <- plot(uout) +
+    ggtitle("updog")
+  print(pl)
+
+  ## uitdewilligen
+  uitcall <- as.numeric(unlist(calldat[index, -1]))
+  print(table(4 - uout$geno, uitcall))
+  
+  pl <- plot_geno(refvec = uout$input$refvec, sizevec = uout$input$sizevec, 
+                  ploidy = ploidy, geno = ploidy - uitcall,
+                  bias = uout$bias, seq = uout$seq) +
+    ggtitle("uitdewilligen")
+  print(pl)
+
+  ## Difference
+  diffvec <- 4 - uout$geno  != uitcall
+
+  pl <- plot_geno(refvec = uout$input$refvec, sizevec = uout$input$sizevec, ploidy = ploidy, geno = diffvec * 1,
+                  bias = uout$bias, seq = uout$seq) +
+    guides(color=guide_legend(title="Agree?"))
+  print(pl)  
+}
+
+```

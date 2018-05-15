@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="David Gerard" />
+
+<meta name="date" content="2018-05-11" />
+
+<title>Uit Variants</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mupdog</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dcgerard/mupdog">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Uit Variants</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>May 11, 2018</em></h4>
+
+</div>
+
+
+<pre class="r"><code>library(tidyverse)
+library(updog)
+vnts &lt;- read.csv(&quot;../data/uit_raw/CSV-file S1 - Sequence variants filtered DP15.csv&quot;, sep = &quot;;&quot;)
+
+select(vnts, Variant.name, P1PEM01:P7PEM12) -&gt;
+  calldat</code></pre>
+<pre class="r"><code>library(vcfR)
+
+uit &lt;- read.vcfR(file = &quot;../data/uit_raw/NewPlusOldCalls.headed.vcf&quot;)</code></pre>
+<pre><code>## Scanning file to determine attributes.
+## File attributes:
+##   meta lines: 57
+##   header_line: 58
+##   variant count: 135193
+##   column count: 93
+## 
+Meta line 57 read in.
+## All meta lines processed.
+## gt matrix initialized.
+## Character matrix gt created.
+##   Character matrix gt rows: 135193
+##   Character matrix gt cols: 93
+##   skip: 0
+##   nrows: 135193
+##   row_num: 0
+## 
+Processed variant 1000
+Processed variant 2000
+Processed variant 3000
+Processed variant 4000
+Processed variant 5000
+Processed variant 6000
+Processed variant 7000
+Processed variant 8000
+Processed variant 9000
+Processed variant 10000
+Processed variant 11000
+Processed variant 12000
+Processed variant 13000
+Processed variant 14000
+Processed variant 15000
+Processed variant 16000
+Processed variant 17000
+Processed variant 18000
+Processed variant 19000
+Processed variant 20000
+Processed variant 21000
+Processed variant 22000
+Processed variant 23000
+Processed variant 24000
+Processed variant 25000
+Processed variant 26000
+Processed variant 27000
+Processed variant 28000
+Processed variant 29000
+Processed variant 30000
+Processed variant 31000
+Processed variant 32000
+Processed variant 33000
+Processed variant 34000
+Processed variant 35000
+Processed variant 36000
+Processed variant 37000
+Processed variant 38000
+Processed variant 39000
+Processed variant 40000
+Processed variant 41000
+Processed variant 42000
+Processed variant 43000
+Processed variant 44000
+Processed variant 45000
+Processed variant 46000
+Processed variant 47000
+Processed variant 48000
+Processed variant 49000
+Processed variant 50000
+Processed variant 51000
+Processed variant 52000
+Processed variant 53000
+Processed variant 54000
+Processed variant 55000
+Processed variant 56000
+Processed variant 57000
+Processed variant 58000
+Processed variant 59000
+Processed variant 60000
+Processed variant 61000
+Processed variant 62000
+Processed variant 63000
+Processed variant 64000
+Processed variant 65000
+Processed variant 66000
+Processed variant 67000
+Processed variant 68000
+Processed variant 69000
+Processed variant 70000
+Processed variant 71000
+Processed variant 72000
+Processed variant 73000
+Processed variant 74000
+Processed variant 75000
+Processed variant 76000
+Processed variant 77000
+Processed variant 78000
+Processed variant 79000
+Processed variant 80000
+Processed variant 81000
+Processed variant 82000
+Processed variant 83000
+Processed variant 84000
+Processed variant 85000
+Processed variant 86000
+Processed variant 87000
+Processed variant 88000
+Processed variant 89000
+Processed variant 90000
+Processed variant 91000
+Processed variant 92000
+Processed variant 93000
+Processed variant 94000
+Processed variant 95000
+Processed variant 96000
+Processed variant 97000
+Processed variant 98000
+Processed variant 99000
+Processed variant 100000
+Processed variant 101000
+Processed variant 102000
+Processed variant 103000
+Processed variant 104000
+Processed variant 105000
+Processed variant 106000
+Processed variant 107000
+Processed variant 108000
+Processed variant 109000
+Processed variant 110000
+Processed variant 111000
+Processed variant 112000
+Processed variant 113000
+Processed variant 114000
+Processed variant 115000
+Processed variant 116000
+Processed variant 117000
+Processed variant 118000
+Processed variant 119000
+Processed variant 120000
+Processed variant 121000
+Processed variant 122000
+Processed variant 123000
+Processed variant 124000
+Processed variant 125000
+Processed variant 126000
+Processed variant 127000
+Processed variant 128000
+Processed variant 129000
+Processed variant 130000
+Processed variant 131000
+Processed variant 132000
+Processed variant 133000
+Processed variant 134000
+Processed variant 135000
+Processed variant: 135193
+## All variants processed</code></pre>
+<pre class="r"><code>## DP = read-depth
+## AA = alternative allele
+## GT = genotype
+## GQ = genotype quality
+## GL = log-10 scaled likelihood of genotype
+## RA = reference allele
+## DP = read-depth
+refmat  &lt;- extract.gt(uit, element = &quot;RA&quot;)
+class(refmat) &lt;- &quot;numeric&quot;
+altmat  &lt;- extract.gt(uit, element = &quot;AA&quot;)
+class(altmat) &lt;- &quot;numeric&quot;
+sizemat &lt;- extract.gt(uit, element = &quot;DP&quot;)
+class(sizemat) &lt;- &quot;numeric&quot;</code></pre>
+<pre class="r"><code>index &lt;- 25538
+ploidy &lt;- 4
+uout &lt;- flexdog(refvec  = refmat[index, ], 
+                sizevec = sizemat[index, ], 
+                ploidy  = ploidy,
+                model   = &quot;norm&quot;)</code></pre>
+<pre><code>##          Fit: 1 of 5 
+## Initial Bias: 0.3679 
+## Log-Likelihood: -183.2 
+## Keeping new fit.
+## 
+##          Fit: 2 of 5 
+## Initial Bias: 0.6065 
+## Log-Likelihood: -183.2 
+## Keeping old fit.
+## 
+##          Fit: 3 of 5 
+## Initial Bias: 1 
+## Log-Likelihood: -183.2 
+## Keeping old fit.
+## 
+##          Fit: 4 of 5 
+## Initial Bias: 1.649 
+## Log-Likelihood: -183.2 
+## Keeping old fit.
+## 
+##          Fit: 5 of 5 
+## Initial Bias: 2.718 
+## Log-Likelihood: -183.6 
+## Keeping old fit.
+## 
+## Done!</code></pre>
+<pre class="r"><code>pl &lt;- plot(uout)
+print(pl)</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>uitcall &lt;- as.numeric(unlist(calldat[index, -1]))
+table(4 - uout$geno, uitcall)</code></pre>
+<pre><code>##    uitcall
+##      0  1  2
+##   0 54  0  0
+##   1  3 22  3
+##   2  0  0  1</code></pre>
+<pre class="r"><code>uitcall[is.na(uitcall)] &lt;- -1
+diffvec &lt;- 4 - uout$geno  != uitcall
+uout$maxpostprob[diffvec]</code></pre>
+<pre><code>## [1] 0.9977 0.8020 0.9607 0.9512 0.9244 0.8727 0.9999</code></pre>
+<pre class="r"><code>uout$input$sizevec[diffvec]</code></pre>
+<pre><code>## [1]  90  76  60   7  50  91 115</code></pre>
+<pre class="r"><code>pl &lt;- plot_geno(refvec = uout$input$refvec, sizevec = uout$input$sizevec, ploidy = ploidy, geno = diffvec * 1) +
+  guides(color=guide_legend(title=&quot;Agree?&quot;))
+print(pl)</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code>set.seed(1)
+indexvec &lt;- sample(1:nrow(refmat), size = 20)
+
+for (index in indexvec) {
+  ploidy &lt;- 4
+  
+  ## updog
+  uout &lt;- flexdog(refvec  = refmat[index, ], 
+                  sizevec = sizemat[index, ], 
+                  ploidy  = ploidy,
+                  model   = &quot;norm&quot;, 
+                  verbose = FALSE)
+  pl &lt;- plot(uout) +
+    ggtitle(&quot;updog&quot;)
+  print(pl)
+
+  ## uitdewilligen
+  uitcall &lt;- as.numeric(unlist(calldat[index, -1]))
+  print(table(4 - uout$geno, uitcall))
+  
+  pl &lt;- plot_geno(refvec = uout$input$refvec, sizevec = uout$input$sizevec, 
+                  ploidy = ploidy, geno = ploidy - uitcall,
+                  bias = uout$bias, seq = uout$seq) +
+    ggtitle(&quot;uitdewilligen&quot;)
+  print(pl)
+
+  ## Difference
+  diffvec &lt;- 4 - uout$geno  != uitcall
+
+  pl &lt;- plot_geno(refvec = uout$input$refvec, sizevec = uout$input$sizevec, ploidy = ploidy, geno = diffvec * 1,
+                  bias = uout$bias, seq = uout$seq) +
+    guides(color=guide_legend(title=&quot;Agree?&quot;))
+  print(pl)  
+}</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2
+##   0 58  5  0
+##   1  0  9  2</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-2.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-3.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-4.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2
+##   0 77  0  0
+##   1  0  1  1</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-5.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-6.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-7.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2
+##   0 23  1  0
+##   1 25  6  0
+##   2 11  4  0
+##   3  0  2  1</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-8.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-9.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-10.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1
+##   0 74  2
+##   1  0  8</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-11.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-12.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-13.png" width="672" /></p>
+<pre><code>##    uitcall
+##     0 1 2 3 4
+##   0 3 0 0 0 0
+##   1 0 2 0 0 0
+##   2 0 8 0 0 0
+##   3 0 0 4 2 0
+##   4 0 0 0 0 3</code></pre>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-14.png" width="672" /></p>
+<pre><code>## Warning: Removed 2 rows containing missing values (geom_point).</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-15.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-16.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2  3
+##   0 24  0  0  0
+##   1  0 43  0  0
+##   2  0  3 11  0
+##   3  0  0  0  2</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-17.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-18.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-19.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2
+##   0 12  1  0
+##   1 25 17  0
+##   2  3 13  7
+##   3  2  1  3</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-20.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-21.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-22.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2
+##   0 51  1  0
+##   1  0 24  0
+##   2  0  0  7</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-23.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-24.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-25.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2  3
+##   2  1 29  0  0
+##   3  0  4 31 15</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-26.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-27.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-28.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2
+##   0 53  0  0
+##   1  0 30  0
+##   2  0  0  1</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-29.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-30.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-31.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2
+##   0 20  0  0
+##   1  0 18  2</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-32.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-33.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-34.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2
+##   0 53  0  0
+##   1  0 29  1</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-35.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-36.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-37.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1
+##   0 83  0
+##   1  0  1</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-38.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-39.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-40.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1
+##   0 69  1
+##   1  0  4</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-41.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-42.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-43.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2  3  4
+##   0  4  0  0  0  0
+##   1  0  3  0  0  0
+##   2  0  1 21  0  0
+##   3  0  0  2 29  0
+##   4  0  0  0  2 22</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-44.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-45.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-46.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1
+##   0 57  0
+##   1  0  5</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-47.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-48.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-49.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2  3
+##   0 20  1  0  0
+##   1  0 28  0  0
+##   2  0  9 15  0
+##   3  0  0  6  5</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-50.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-51.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-52.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2  3  4
+##   0 19  1  0  0  0
+##   1  0 29  1  0  0
+##   2  0  0 27  1  0
+##   3  0  0  0  5  0
+##   4  0  0  0  0  1</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-53.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-54.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-55.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1
+##   0 57  1
+##   1  0 19</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-56.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-57.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-58.png" width="672" /></p>
+<pre><code>##    uitcall
+##      0  1  2  3
+##   0 26  3  0  0
+##   1  0 16  0  0
+##   2  0  1 13  0
+##   3  0  0  0  3</code></pre>
+<p><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-59.png" width="672" /><img src="uit_compare_variants_files/figure-html/unnamed-chunk-4-60.png" width="672" /></p>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

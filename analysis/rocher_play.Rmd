@@ -1,0 +1,132 @@
+---
+title: "Play with Rocher et al Data"
+author: "David Gerard"
+date: "May 12, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I look at the data from:
+
+Article Source: Validation of Genotyping-By-Sequencing Analysis in Populations of Tetraploid Alfalfa by 454 Sequencing 
+Rocher S, Jean M, Castonguay Y, Belzile F (2015) Validation of Genotyping-By-Sequencing Analysis in Populations of Tetraploid Alfalfa by 454 Sequencing. PLOS ONE 10(6): e0131918. https://doi.org/10.1371/journal.pone.0131918
+
+# Analysis
+
+```{r, message=FALSE}
+library(tidyverse)
+library(stringr)
+library(updog)
+ploidy <- 4
+```
+
+```{r, eval = FALSE}
+snpvec <- c("TP67636",
+            "TP7278",
+            "TP80194",
+            "TP79240",
+            "TP91313",
+            "TP32628",
+            "TP47889",
+            "TP61949",
+            "TP14949",
+            "TP31029",
+            "TP46847",
+            "TP17289",
+            "TP1933",
+            "TP26408")
+
+rochdat <- as_data_frame(read.csv("../data/rocher/rocher_dat.csv"))
+rochdat$snp <- rep(snpvec, each = 2)
+
+rochdat %>%
+  select(snp, seq, contains("A")) %>%
+  gather(key = "id", value = "alt", contains("A")) %>%
+  mutate(id = str_replace(id, "A", "")) ->
+  altdat
+rochdat %>%
+  select(snp, seq, contains("R")) %>%
+  gather(key = "id", value = "ref", contains("R")) %>%
+  mutate(id = str_replace(id, "R", "")) ->
+  refdat
+
+full_join(altdat, refdat) ->
+  snpdat
+
+
+rochgeno <- as_data_frame(read.csv("../data/rocher/rocher_geno.csv", header = FALSE))
+rochgeno$snp <- rep(snpvec, each = 2)
+colnames(rochgeno) <- colnames(rochdat)
+rochgeno %>%
+  select(snp, seq, contains("R")) %>%
+  gather(key = "id", value = "rocher_dosage", contains("R")) %>%
+  mutate(id = str_replace(id, "R", "")) ->
+  refgeno
+
+full_join(snpdat, refgeno) ->
+  snpdat
+  
+
+
+saveRDS(object = snpdat, file = "../data/rocher/roch_dat.RDS")
+```
+
+```{r}
+snpdat <- readRDS("../data/rocher/roch_dat.RDS")
+snpdat$up_dosage <- NA
+snpvec <- unique(snpdat$snp)
+for (index in 1:length(snpvec)) {
+  current_snp <- snpvec[index]
+  snpdat %>%
+    filter(seq == "454", snp == current_snp) ->
+    smalldat
+  refvec_454  <- smalldat$ref
+  sizevec_454 <- smalldat$ref + smalldat$alt
+  
+  snpdat %>%
+    filter(seq == "GBS", snp == current_snp) ->
+    smalldat
+  refvec_gbs  <- smalldat$ref
+  sizevec_gbs <- smalldat$ref + smalldat$alt
+  
+  f454 <- flexdog(refvec  = refvec_454, 
+                  sizevec = sizevec_454, 
+                  ploidy  = ploidy, 
+                  model   = "hw",
+                  verbose = FALSE)
+  fgbs <- flexdog(refvec  = refvec_gbs, 
+                  sizevec = sizevec_gbs, 
+                  ploidy  = ploidy, 
+                  model   = "hw",
+                  verbose = FALSE)  
+
+  snpdat$up_dosage[snpdat$seq == "GBS" & snpdat$snp == current_snp] <- fgbs$geno
+  snpdat$up_dosage[snpdat$seq == "454" & snpdat$snp == current_snp] <- f454$geno
+  
+}
+
+saveRDS(snpdat, "../data/rocher/roch_dat_up.RDS")
+```
+
+
+```{r}
+snpdat %>%
+  filter(seq == "GBS") %>%
+  select(rocher_dosage, up_dosage) ->
+  gbs_dosage
+
+snpdat %>%
+  filter(seq == "454") %>%
+  select(rocher_dosage, up_dosage) ->
+  f5f_dosage
+
+mean(gbs_dosage$rocher_dosage != f5f_dosage$rocher_dosage)
+mean(gbs_dosage$up_dosage != f5f_dosage$up_dosage)
+
+```
+

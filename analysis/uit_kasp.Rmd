@@ -1,0 +1,37 @@
+---
+title: "Play with KASP data from Uit"
+author: "David Gerard"
+date: "May 15, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I play around with the KASP data from Uitdewilligen et al (2013).
+
+# Analysis
+
+```{r, message=FALSE}
+library(tidyverse)
+kasp <- read_csv("../data/uit_raw/kasp_snps.csv")
+
+length(unique(kasp$SNPID))
+length(unique(kasp$SubjectID))
+snpvec <- unique(kasp$SNPID)
+```
+
+```{r}
+index <- 700
+kasp %>% filter(SNPID == snpvec[index]) ->
+  smalldat
+maxval <- max(c(smalldat$X, smalldat$Y))
+ggplot(smalldat, aes(x = X, y = Y)) +
+  geom_point() +
+  theme_bw() 
+```
+
+

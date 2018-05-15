@@ -1,0 +1,64 @@
+---
+title: "Test vcfdog"
+author: David Gerard
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I test out the new `vcfdog` function in `updog`.
+
+# Analysis
+
+```{r}
+library(updog)
+library(VariantAnnotation)
+input <- "../data/uit_small/uit.vcf"
+output <- "../data/uit_small/uit_fit.vcf"
+vcfdog(input  = input, 
+       output = output, 
+       ploidy = 4, 
+       nc     = 2)
+tout <- readVcf(file = output, genome = "updog")
+meta(header(tout))$META
+info(tout)$BIAS
+info(tout)$SEQ
+info(tout)$OD
+info(tout)$PM
+info(tout)$PRIOR
+dim(geno(tout)$GT)
+dim(geno(tout)$GQ)
+dim(geno(tout)$DS)
+dim(geno(tout)$GP)
+```
+
+Compare to just a regular `flexdog` fit.
+
+```{r}
+index <- 4
+uit     <- readVcf(file = input, genome = "updog")
+altvec  <- geno(uit)$AA[index, ]
+sizevec <- geno(uit)$DP[index, ]
+ploidy  <- 4
+fout <- flexdog(refvec = altvec, sizevec = sizevec, ploidy = ploidy)
+
+fout$bias
+info(tout)$BIAS[index]
+
+fout$seq
+info(tout)$SEQ[index]
+
+fout$od
+info(tout)$OD[index]
+
+plot(log(geno(tout)$DS[index, ]),
+     log(fout$postmean),
+     main = "log-Posterior Means")
+```
+
+
+
