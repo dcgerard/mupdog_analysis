@@ -42,6 +42,33 @@ class(sizemat) <- "numeric"
 ```{r}
 index <- 25538
 ploidy <- 4
+
+uout <- flexdog(refvec  = refmat[index, ], 
+                sizevec = sizemat[index, ], 
+                ploidy  = ploidy,
+                model   = "flex")
+pl <- plot(uout)
+pdf(file = "../output/uit_fit/bad_flex_fit.pdf",
+    height = 3, width = 4.3, family = "Times")
+print(pl)
+dev.off()
+
+pl <- qplot(x    = 0:ploidy, 
+            xend = 0:ploidy,
+            y    = 0, 
+            yend = uout$gene_dist, 
+            geom = "segment",
+            lwd  = I(2),
+            lineend = "round",
+            xlab = "Genotype",
+            ylab = "Probability") +
+  theme_bw()
+pdf(file = "../output/uit_fit/bad_flex_fit_dist.pdf",
+    height = 3, width = 4.3, family = "Times")
+print(pl)
+dev.off()
+
+
 uout <- flexdog(refvec  = refmat[index, ], 
                 sizevec = sizemat[index, ], 
                 ploidy  = ploidy,

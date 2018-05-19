@@ -1,0 +1,97 @@
+---
+title: "ashr's CVX vs updog's EM"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Context
+
+Both `ashr` and `updog` fit the following problem
+$$
+\max_{\mathbf{\pi}} \sum_{k = 0}^Kw_k\log(\sum_{i = 0}^K\pi_i\ell_{ik}).
+$$
+
+`updog` allows for using either CVXR or using a weighted EM algorithm. `ashr` allows for using `Rmosek`. I just want to see which one is faster.
+
+# Analysis
+
+```{r, message=FALSE}
+set.seed(1)
+library(updog)
+library(ashr)
+library(tidyverse)
+library(microbenchmark)
+ploidy <- 6
+lmat <- updog:::get_inner_weights(ploidy = ploidy, mode = 3.5)
+weight_vec <- abs(rnorm(ploidy + 1))
+lmat
+weight_vec
+```
+
+```{r}
+pi_init <- runif(ploidy + 1)
+pi_init <- pi_init / sum(pi_init)
+lambda <- 10^-8
+
+mout <- microbenchmark(
+upiout <- updog:::uni_em(weight_vec = weight_vec,
+                         lmat       = lmat, 
+                         pi_init    = pi_init, 
+                         lambda     = lambda, 
+                         itermax    = 1000,
+                         obj_tol    = 10^-6),
+apiout <- ashr:::mixIP(matrix_lik = t(lmat), 
+                       prior      = rep(lambda + 1, ploidy + 1), 
+                       pi_init    = pi_init, 
+                       weights    = weight_vec)$pihat  
+)
+```
+
+
+`ashr` and `updog` give the same results
+```{r}
+qplot(upiout, apiout, xlab = "updog", ylab = "ashr") +
+  geom_abline() +
+  theme_bw()
+```
+
+`updog` is about 30 to 40 times faster.
+```{r}
+mout
+```
+
+
+# `updog` EM vs `ashr` EM
+
+
+```{r}
+uni_weight_vec <- rep(1, ploidy + 1)
+mout <- microbenchmark(
+upiout <- updog:::uni_em(weight_vec = uni_weight_vec,
+                         lmat       = lmat, 
+                         pi_init    = pi_init, 
+                         lambda     = 0, 
+                         itermax    = 1000,
+                         obj_tol    = 10^-6),
+apiout <- ashr::mixEM(matrix_lik = t(lmat), 
+                      prior      = rep(1, ploidy + 1))$pihat
+)
+```
+
+```{r}
+qplot(upiout, apiout, xlab = "updog", ylab = "ashr") +
+  geom_abline() +
+  theme_bw()
+```
+
+`updog` is about 20 to 30 times faster than `ashr`
+```{r}
+mout
+```
+
+```{r}
+sessionInfo()
+```

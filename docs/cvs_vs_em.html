@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>ashr’s CVX vs updog’s EM</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-4.5.0/css/font-awesome.min.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mupdog</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dcgerard/mupdog">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">ashr’s CVX vs updog’s EM</h1>
+
+</div>
+
+
+<div id="context" class="section level1">
+<h1>Context</h1>
+<p>Both <code>ashr</code> and <code>updog</code> fit the following problem <span class="math display">\[
+\max_{\mathbf{\pi}} \sum_{k = 0}^Kw_k\log(\sum_{i = 0}^K\pi_i\ell_{ik}).
+\]</span></p>
+<p><code>updog</code> allows for using either CVXR or using a weighted EM algorithm. <code>ashr</code> allows for using <code>Rmosek</code>. I just want to see which one is faster.</p>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<pre class="r"><code>set.seed(1)
+library(updog)
+library(ashr)
+library(tidyverse)
+library(microbenchmark)
+ploidy &lt;- 6
+lmat &lt;- updog:::get_inner_weights(ploidy = ploidy, mode = 3.5)
+weight_vec &lt;- abs(rnorm(ploidy + 1))
+lmat</code></pre>
+<pre><code>##      [,1]   [,2]   [,3]   [,4]   [,5]   [,6]   [,7]
+## [1,] 0.25 0.2500 0.2500 0.2500 0.0000 0.0000 0.0000
+## [2,] 0.00 0.3333 0.3333 0.3333 0.0000 0.0000 0.0000
+## [3,] 0.00 0.0000 0.5000 0.5000 0.0000 0.0000 0.0000
+## [4,] 0.00 0.0000 0.0000 1.0000 0.0000 0.0000 0.0000
+## [5,] 0.00 0.0000 0.0000 0.0000 1.0000 0.0000 0.0000
+## [6,] 0.00 0.0000 0.0000 0.0000 0.5000 0.5000 0.0000
+## [7,] 0.00 0.0000 0.0000 0.0000 0.3333 0.3333 0.3333</code></pre>
+<pre class="r"><code>weight_vec</code></pre>
+<pre><code>## [1] 0.6265 0.1836 0.8356 1.5953 0.3295 0.8205 0.4874</code></pre>
+<pre class="r"><code>pi_init &lt;- runif(ploidy + 1)
+pi_init &lt;- pi_init / sum(pi_init)
+lambda &lt;- 10^-8
+
+mout &lt;- microbenchmark(
+upiout &lt;- updog:::uni_em(weight_vec = weight_vec,
+                         lmat       = lmat, 
+                         pi_init    = pi_init, 
+                         lambda     = lambda, 
+                         itermax    = 1000,
+                         obj_tol    = 10^-6),
+apiout &lt;- ashr:::mixIP(matrix_lik = t(lmat), 
+                       prior      = rep(lambda + 1, ploidy + 1), 
+                       pi_init    = pi_init, 
+                       weights    = weight_vec)$pihat  
+)</code></pre>
+<p><code>ashr</code> and <code>updog</code> give the same results</p>
+<pre class="r"><code>qplot(upiout, apiout, xlab = &quot;updog&quot;, ylab = &quot;ashr&quot;) +
+  geom_abline() +
+  theme_bw()</code></pre>
+<p><img src="cvs_vs_em_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p><code>updog</code> is about 30 to 40 times faster.</p>
+<pre class="r"><code>mout</code></pre>
+<pre><code>## Unit: microseconds
+##                                                                                                                                      expr
+##  upiout &lt;- updog:::uni_em(weight_vec = weight_vec, lmat = lmat,      pi_init = pi_init, lambda = lambda, itermax = 1000, obj_tol = 10^-6)
+##     apiout &lt;- ashr:::mixIP(matrix_lik = t(lmat), prior = rep(lambda +      1, ploidy + 1), pi_init = pi_init, weights = weight_vec)$pihat
+##      min      lq    mean  median      uq     max neval
+##    42.03   46.45   64.42   64.58   70.91   168.1   100
+##  1702.17 1738.09 2345.88 1895.43 2306.52 22746.6   100</code></pre>
+</div>
+<div id="updog-em-vs-ashr-em" class="section level1">
+<h1><code>updog</code> EM vs <code>ashr</code> EM</h1>
+<pre class="r"><code>uni_weight_vec &lt;- rep(1, ploidy + 1)
+mout &lt;- microbenchmark(
+upiout &lt;- updog:::uni_em(weight_vec = uni_weight_vec,
+                         lmat       = lmat, 
+                         pi_init    = pi_init, 
+                         lambda     = 0, 
+                         itermax    = 1000,
+                         obj_tol    = 10^-6),
+apiout &lt;- ashr::mixEM(matrix_lik = t(lmat), 
+                      prior      = rep(1, ploidy + 1))$pihat
+)</code></pre>
+<pre class="r"><code>qplot(upiout, apiout, xlab = &quot;updog&quot;, ylab = &quot;ashr&quot;) +
+  geom_abline() +
+  theme_bw()</code></pre>
+<p><img src="cvs_vs_em_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><code>updog</code> is about 20 to 30 times faster than <code>ashr</code></p>
+<pre class="r"><code>mout</code></pre>
+<pre><code>## Unit: microseconds
+##                                                                                                                                     expr
+##  upiout &lt;- updog:::uni_em(weight_vec = uni_weight_vec, lmat = lmat,      pi_init = pi_init, lambda = 0, itermax = 1000, obj_tol = 10^-6)
+##                                                       apiout &lt;- ashr::mixEM(matrix_lik = t(lmat), prior = rep(1, ploidy +      1))$pihat
+##     min     lq   mean median     uq    max neval
+##   121.7  125.1  142.2  135.2  143.6  297.7   100
+##  2894.6 2954.7 3211.6 3054.1 3175.0 7571.6   100</code></pre>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.5.0 (2018-04-23)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.4 LTS
+## 
+## Matrix products: default
+## BLAS: /usr/local/lib/R/lib/libRblas.so
+## LAPACK: /usr/local/lib/R/lib/libRlapack.so
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] microbenchmark_1.4-4 forcats_0.3.0        stringr_1.3.1       
+##  [4] dplyr_0.7.4          purrr_0.2.4          readr_1.1.1         
+##  [7] tidyr_0.8.0          tibble_1.4.2         ggplot2_2.2.1       
+## [10] tidyverse_1.2.1      ashr_2.2-7           updog_0.99.0        
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_0.12.17            lubridate_1.7.4        
+##  [3] lattice_0.20-35         Rmosek_7.1.3           
+##  [5] assertthat_0.2.0        rprojroot_1.3-2        
+##  [7] digest_0.6.15           psych_1.8.4            
+##  [9] foreach_1.4.4           truncnorm_1.0-8        
+## [11] R6_2.2.2                cellranger_1.1.0       
+## [13] plyr_1.8.4              backports_1.1.2        
+## [15] evaluate_0.10.1         httr_1.3.1             
+## [17] pillar_1.2.2            rlang_0.2.0            
+## [19] lazyeval_0.2.1          pscl_1.5.2             
+## [21] readxl_1.1.0            rstudioapi_0.7         
+## [23] Matrix_1.2-14           rmarkdown_1.9          
+## [25] labeling_0.3            foreign_0.8-70         
+## [27] REBayes_1.3             munsell_0.4.3          
+## [29] broom_0.4.4             compiler_3.5.0         
+## [31] modelr_0.1.2            pkgconfig_2.0.1        
+## [33] mnormt_1.5-5            SQUAREM_2017.10-1      
+## [35] htmltools_0.3.6         codetools_0.2-15       
+## [37] crayon_1.3.4            MASS_7.3-50            
+## [39] grid_3.5.0              nlme_3.1-137           
+## [41] jsonlite_1.5            gtable_0.2.0           
+## [43] magrittr_1.5            scales_0.5.0           
+## [45] cli_1.0.0               stringi_1.2.2          
+## [47] reshape2_1.4.3          RcppArmadillo_0.8.500.0
+## [49] ggthemes_3.5.0          doParallel_1.0.11      
+## [51] bindrcpp_0.2.2          xml2_1.2.0             
+## [53] iterators_1.0.9         tools_3.5.0            
+## [55] glue_1.2.0              hms_0.4.2              
+## [57] parallel_3.5.0          yaml_2.1.19            
+## [59] colorspace_1.3-2        rvest_0.3.2            
+## [61] knitr_1.20              bindr_0.1.1            
+## [63] haven_1.1.1</code></pre>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

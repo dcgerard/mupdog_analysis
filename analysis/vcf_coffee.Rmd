@@ -1,0 +1,16 @@
+---
+title: "Check out vcfdog on Coffee"
+author: "David Gerard"
+date: "May 15, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Try out `vcfdog` on coffee.
+
+# Analysis
