@@ -1,0 +1,103 @@
+---
+title: "CVX vs EM"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I repeat the analysis of [this](cvs_vs_em.html) but use a larger dataset that is more ash-like.
+
+# Analysis
+
+```{r, message=FALSE}
+set.seed(1)
+library(updog)
+library(ashr)
+library(tidyverse)
+library(microbenchmark)
+```
+
+## Simulate Data and Run Methods
+
+```{r}
+n <- 1000
+k <- 20
+lmat <- matrix(runif(k * n), nrow = n)
+lmat <- lmat / rowSums(lmat)
+weight_vec <- rep(1, n)
+pi_init <- rep(1 / k, k)
+lambda <- 0
+mout <- microbenchmark(
+upiout <- updog:::wem(weight_vec = weight_vec,
+                      lmat       = t(lmat), 
+                      pi_init    = pi_init, 
+                      lambda     = lambda, 
+                      itermax    = 1000,
+                      obj_tol    = 10^-6),
+apiout_em <- ashr:::mixEM(matrix_lik = lmat, 
+                          prior      = rep(lambda + 1, k), 
+                          pi_init    = pi_init)$pihat,  
+apiout_cv <- ashr:::mixIP(matrix_lik = lmat, 
+                          prior      = rep(lambda + 1, k), 
+                          pi_init    = pi_init)$pihat  
+)
+```
+
+
+## Results:
+```{r}
+mout
+
+plot(upiout, apiout_em, xlab = "updog", ylab = "ashEM")
+abline(0, 1)
+
+plot(upiout, apiout_cv, xlab = "updog", ylab = "ashIP")
+abline(0, 1)
+```
+
+## Same as above but use n = 10000
+```{r}
+n <- 10000
+k <- 20
+lmat <- matrix(runif(k * n), nrow = n)
+lmat <- lmat / rowSums(lmat)
+weight_vec <- rep(1, n)
+pi_init <- rep(1 / k, k)
+lambda <- 0
+mout <- microbenchmark(
+upiout <- updog:::wem(weight_vec = weight_vec,
+                      lmat       = t(lmat), 
+                      pi_init    = pi_init, 
+                      lambda     = lambda, 
+                      itermax    = 1000,
+                      obj_tol    = 10^-6),
+apiout_em <- ashr:::mixEM(matrix_lik = lmat, 
+                          prior      = rep(lambda + 1, k), 
+                          pi_init    = pi_init)$pihat,  
+apiout_cv <- ashr:::mixIP(matrix_lik = lmat, 
+                          prior      = rep(lambda + 1, k), 
+                          pi_init    = pi_init)$pihat  
+)
+```
+
+
+## Results:
+```{r}
+mout
+
+plot(upiout, apiout_em, xlab = "updog", ylab = "ashEM")
+abline(0, 1)
+
+plot(upiout, apiout_cv, xlab = "updog", ylab = "ashIP")
+abline(0, 1)
+```
+
+
+```{r}
+sessionInfo()
+```
+
