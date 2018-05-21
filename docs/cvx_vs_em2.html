@@ -351,9 +351,9 @@ apiout_cv &lt;- ashr:::mixIP(matrix_lik = lmat,
 ##                                    apiout_em &lt;- ashr:::mixEM(matrix_lik = lmat, prior = rep(lambda +      1, k), pi_init = pi_init)$pihat
 ##                                    apiout_cv &lt;- ashr:::mixIP(matrix_lik = lmat, prior = rep(lambda +      1, k), pi_init = pi_init)$pihat
 ##     min     lq   mean median     uq    max neval
-##   8.083  8.127  8.476  8.339  8.785  11.45   100
-##  16.448 19.139 19.909 20.186 20.740  24.19   100
-##  13.676 14.244 15.843 14.415 14.844 112.58   100</code></pre>
+##   8.171  8.247  8.575   8.35  8.651  11.61   100
+##  16.470 19.167 20.727  19.69 20.480 113.16   100
+##  13.696 14.010 14.816  14.22 14.661  32.58   100</code></pre>
 <pre class="r"><code>plot(upiout, apiout_em, xlab = &quot;updog&quot;, ylab = &quot;ashEM&quot;)
 abline(0, 1)</code></pre>
 <p><img src="cvx_vs_em2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
@@ -394,15 +394,1601 @@ apiout_cv &lt;- ashr:::mixIP(matrix_lik = lmat,
 ##                                    apiout_em &lt;- ashr:::mixEM(matrix_lik = lmat, prior = rep(lambda +      1, k), pi_init = pi_init)$pihat
 ##                                    apiout_cv &lt;- ashr:::mixIP(matrix_lik = lmat, prior = rep(lambda +      1, k), pi_init = pi_init)$pihat
 ##     min    lq   mean median     uq    max neval
-##   29.82  31.0  31.82  31.32  32.33  43.95   100
-##  106.05 113.6 136.60 117.42 123.30 242.88   100
-##  133.14 135.3 143.23 137.72 141.63 230.41   100</code></pre>
+##   30.13  31.2  32.19  31.54  32.43  43.47   100
+##  104.90 114.7 137.20 118.01 127.52 260.06   100
+##  131.53 134.4 142.79 137.58 140.04 228.45   100</code></pre>
 <pre class="r"><code>plot(upiout, apiout_em, xlab = &quot;updog&quot;, ylab = &quot;ashEM&quot;)
 abline(0, 1)</code></pre>
 <p><img src="cvx_vs_em2_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
 <pre class="r"><code>plot(upiout, apiout_cv, xlab = &quot;updog&quot;, ylab = &quot;ashIP&quot;)
 abline(0, 1)</code></pre>
 <p><img src="cvx_vs_em2_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+</div>
+<div id="same-as-above-but-use-n-100000" class="section level2">
+<h2>Same as above but use n = 100000</h2>
+<pre class="r"><code>n &lt;- 100000
+k &lt;- 20
+lmat &lt;- matrix(runif(k * n), nrow = n)
+lmat &lt;- lmat / rowSums(lmat)
+weight_vec &lt;- rep(1, n)
+pi_init &lt;- rep(1 / k, k)
+lambda &lt;- 0
+mout &lt;- microbenchmark(
+upiout &lt;- updog:::wem(weight_vec = weight_vec,
+                      lmat       = t(lmat), 
+                      pi_init    = pi_init, 
+                      lambda     = lambda, 
+                      itermax    = 1000,
+                      obj_tol    = 10^-6),
+apiout_em &lt;- ashr:::mixEM(matrix_lik = lmat, 
+                          prior      = rep(lambda + 1, k), 
+                          pi_init    = pi_init)$pihat,  
+apiout_cv &lt;- ashr:::mixIP(matrix_lik = lmat, 
+                          prior      = rep(lambda + 1, k), 
+                          pi_init    = pi_init)$pihat  
+)</code></pre>
+<pre><code>## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69 
+## Squarem-1 
+## Objective fn:  299573 
+## Objective fn:  299573   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  299571   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  299567   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  58.1 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  64 
+## Objective fn:  299566   Extrapolation:  TRUE   Steplength:  68.69</code></pre>
+</div>
+<div id="results-2" class="section level2">
+<h2>Results:</h2>
+<pre class="r"><code>mout</code></pre>
+<pre><code>## Unit: milliseconds
+##                                                                                                                                      expr
+##  upiout &lt;- updog:::wem(weight_vec = weight_vec, lmat = t(lmat),      pi_init = pi_init, lambda = lambda, itermax = 1000, obj_tol = 10^-6)
+##                                    apiout_em &lt;- ashr:::mixEM(matrix_lik = lmat, prior = rep(lambda +      1, k), pi_init = pi_init)$pihat
+##                                    apiout_cv &lt;- ashr:::mixIP(matrix_lik = lmat, prior = rep(lambda +      1, k), pi_init = pi_init)$pihat
+##     min     lq   mean median     uq    max neval
+##   143.8  147.0  153.6  148.4  150.8  291.1   100
+##   762.4  861.6  890.5  880.9  909.6 1524.1   100
+##  1441.1 1457.5 1499.0 1475.6 1553.0 1599.1   100</code></pre>
+<pre class="r"><code>plot(upiout, apiout_em, xlab = &quot;updog&quot;, ylab = &quot;ashEM&quot;)
+abline(0, 1)</code></pre>
+<p><img src="cvx_vs_em2_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>plot(upiout, apiout_cv, xlab = &quot;updog&quot;, ylab = &quot;ashIP&quot;)
+abline(0, 1)</code></pre>
+<p><img src="cvx_vs_em2_files/figure-html/unnamed-chunk-7-2.png" width="672" /></p>
+</div>
+<div id="same-as-above-but-use-n-1000000" class="section level2">
+<h2>Same as above but use n = 1000000</h2>
+<pre class="r"><code>n &lt;- 1000000
+k &lt;- 20
+lmat &lt;- matrix(runif(k * n), nrow = n)
+lmat &lt;- lmat / rowSums(lmat)
+weight_vec &lt;- rep(1, n)
+pi_init &lt;- rep(1 / k, k)
+lambda &lt;- 0
+mout &lt;- microbenchmark(
+upiout &lt;- updog:::wem(weight_vec = weight_vec,
+                      lmat       = t(lmat), 
+                      pi_init    = pi_init, 
+                      lambda     = lambda, 
+                      itermax    = 1000,
+                      obj_tol    = 10^-6),
+apiout_em &lt;- ashr:::mixEM(matrix_lik = lmat, 
+                          prior      = rep(lambda + 1, k), 
+                          pi_init    = pi_init)$pihat,  
+apiout_cv &lt;- ashr:::mixIP(matrix_lik = lmat, 
+                          prior      = rep(lambda + 1, k), 
+                          pi_init    = pi_init)$pihat  
+)</code></pre>
+<pre><code>## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92 
+## Squarem-1 
+## Objective fn:  2995732 
+## Objective fn:  2995732   Extrapolation:  TRUE   Steplength:  1 
+## Objective fn:  2995729   Extrapolation:  TRUE   Steplength:  4 
+## Objective fn:  2995725   Extrapolation:  TRUE   Steplength:  16 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  56.81 
+## Objective fn:  2995723   Extrapolation:  TRUE   Steplength:  53.92</code></pre>
+</div>
+<div id="results-3" class="section level2">
+<h2>Results:</h2>
+<pre class="r"><code>mout</code></pre>
+<pre><code>## Unit: seconds
+##                                                                                                                                      expr
+##  upiout &lt;- updog:::wem(weight_vec = weight_vec, lmat = t(lmat),      pi_init = pi_init, lambda = lambda, itermax = 1000, obj_tol = 10^-6)
+##                                    apiout_em &lt;- ashr:::mixEM(matrix_lik = lmat, prior = rep(lambda +      1, k), pi_init = pi_init)$pihat
+##                                    apiout_cv &lt;- ashr:::mixIP(matrix_lik = lmat, prior = rep(lambda +      1, k), pi_init = pi_init)$pihat
+##     min     lq   mean median     uq    max neval
+##   1.511  1.538  1.559  1.548  1.565  1.678   100
+##   8.333  8.788  8.952  8.967  9.126  9.440   100
+##  16.219 16.556 16.678 16.718 16.794 17.189   100</code></pre>
+<pre class="r"><code>plot(upiout, apiout_em, xlab = &quot;updog&quot;, ylab = &quot;ashEM&quot;)
+abline(0, 1)</code></pre>
+<p><img src="cvx_vs_em2_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code>plot(upiout, apiout_cv, xlab = &quot;updog&quot;, ylab = &quot;ashIP&quot;)
+abline(0, 1)</code></pre>
+<p><img src="cvx_vs_em2_files/figure-html/unnamed-chunk-9-2.png" width="672" /></p>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.5.0 (2018-04-23)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
