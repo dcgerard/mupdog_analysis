@@ -1,0 +1,54 @@
+---
+title: "Hypergeometric as Special Case"
+author: "David Gerard"
+date: "May 23, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I demonstrate that the hypergeometric distribution is a special case of the mixture of off-zero binomials.
+
+# Demonstration
+
+```{r}
+library(updog)
+ploidy <- 10
+ell    <- 4 # allele dosage
+
+hdist <- stats::dhyper(x = 0:(ploidy / 2),
+                       m = ell,
+                       n = ploidy - ell, 
+                       k = ploidy / 2)
+blist <- get_bivalent_probs(ploidy = ploidy)
+hweight_list <- get_hyper_weights(ploidy = ploidy, ell = ell)
+
+
+distmat <- blist$probmat[blist$lvec == ell, , drop = FALSE]
+distmat
+weightvec <- hweight_list$weightvec
+weightvec
+```
+
+The hypergeometric distribution and the mixture distribution are the exact same:
+```{r}
+colSums(distmat * weightvec)
+hdist
+```
+
+Thus, if there were no preferential pairing, we would expect the following configurations
+```{r}
+hweight_list$pmat
+```
+with probabilities:
+```{r}
+hweight_list$weightvec
+```
+
+Deviations away from these mixing probabilities indicate preferential pairing.
+
+

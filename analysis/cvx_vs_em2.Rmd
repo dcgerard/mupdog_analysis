@@ -24,6 +24,19 @@ library(microbenchmark)
 ## Simulate Data and Run Methods
 
 ```{r}
+control <- list()
+control$maxiter <- 1000
+control$method <- 3 
+control$trace <- FALSE
+control$step.min0 <- 10^-6
+control$step.max0 <- 10
+control$objfn.inc <- 10^-2
+control$tol <- 10^-6
+control$mstep <- 100
+```
+
+
+```{r}
 n <- 1000
 k <- 20
 lmat <- matrix(runif(k * n), nrow = n)
@@ -43,7 +56,11 @@ apiout_em <- ashr:::mixEM(matrix_lik = lmat,
                           pi_init    = pi_init)$pihat,  
 apiout_cv <- ashr:::mixIP(matrix_lik = lmat, 
                           prior      = rep(lambda + 1, k), 
-                          pi_init    = pi_init)$pihat  
+                          pi_init    = pi_init)$pihat ,
+apiout_cxx <- ashr:::cxxMixSquarem(matrix_lik = lmat, 
+                                   prior = rep(lambda + 1, k),
+                                   pi_init = pi_init,
+                                   control = control)$pihat
 )
 ```
 
@@ -56,6 +73,9 @@ plot(upiout, apiout_em, xlab = "updog", ylab = "ashEM")
 abline(0, 1)
 
 plot(upiout, apiout_cv, xlab = "updog", ylab = "ashIP")
+abline(0, 1)
+
+plot(upiout, apiout_cxx, xlab = "updog", ylab = "ashIP")
 abline(0, 1)
 ```
 
@@ -80,7 +100,11 @@ apiout_em <- ashr:::mixEM(matrix_lik = lmat,
                           pi_init    = pi_init)$pihat,  
 apiout_cv <- ashr:::mixIP(matrix_lik = lmat, 
                           prior      = rep(lambda + 1, k), 
-                          pi_init    = pi_init)$pihat  
+                          pi_init    = pi_init)$pihat,
+apiout_cxx <- ashr:::cxxMixSquarem(matrix_lik = lmat, 
+                                   prior = rep(lambda + 1, k),
+                                   pi_init = pi_init,
+                                   control = control)$pihat
 )
 ```
 
@@ -93,6 +117,9 @@ plot(upiout, apiout_em, xlab = "updog", ylab = "ashEM")
 abline(0, 1)
 
 plot(upiout, apiout_cv, xlab = "updog", ylab = "ashIP")
+abline(0, 1)
+
+plot(upiout, apiout_cxx, xlab = "updog", ylab = "ashIP")
 abline(0, 1)
 ```
 
@@ -117,7 +144,11 @@ apiout_em <- ashr:::mixEM(matrix_lik = lmat,
                           pi_init    = pi_init)$pihat,  
 apiout_cv <- ashr:::mixIP(matrix_lik = lmat, 
                           prior      = rep(lambda + 1, k), 
-                          pi_init    = pi_init)$pihat  
+                          pi_init    = pi_init)$pihat,
+apiout_cxx <- ashr:::cxxMixSquarem(matrix_lik = lmat, 
+                                   prior = rep(lambda + 1, k),
+                                   pi_init = pi_init,
+                                   control = control)$pihat
 )
 ```
 
@@ -130,6 +161,9 @@ plot(upiout, apiout_em, xlab = "updog", ylab = "ashEM")
 abline(0, 1)
 
 plot(upiout, apiout_cv, xlab = "updog", ylab = "ashIP")
+abline(0, 1)
+
+plot(upiout, apiout_cxx, xlab = "updog", ylab = "ashIP")
 abline(0, 1)
 ```
 
@@ -155,7 +189,11 @@ apiout_em <- ashr:::mixEM(matrix_lik = lmat,
                           pi_init    = pi_init)$pihat,  
 apiout_cv <- ashr:::mixIP(matrix_lik = lmat, 
                           prior      = rep(lambda + 1, k), 
-                          pi_init    = pi_init)$pihat  
+                          pi_init    = pi_init)$pihat,
+apiout_cxx <- ashr:::cxxMixSquarem(matrix_lik = lmat, 
+                                   prior = rep(lambda + 1, k),
+                                   pi_init = pi_init,
+                                   control = control)$pihat
 )
 ```
 
