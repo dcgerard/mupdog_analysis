@@ -1,0 +1,166 @@
+---
+title: "Explore GATK Results"
+author: "David Gerard"
+date: "May 23, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.height = 8, fig.width = 6.5)
+```
+
+# Abstract
+
+Just look at the new sims results that contain GATK.
+
+# Analysis
+
+```{r, message=FALSE}
+library(tidyverse)
+library(ggthemes)
+simsout <- as_data_frame(read.csv("../../../reproduce_genotyping/Output/sims_out/sims_out.csv"))
+```
+
+
+## Proportion Correct
+
+```{r}
+simsout %>%
+  select(bham, uham, fpham, gham, od_param, bias_val, allele_freq) %>%
+  mutate(af = cut(allele_freq, breaks = seq(0, 1, by = 0.25))) %>%
+  transmute(Li = bham, updog = uham, fitPoly = fpham, GATK = gham,
+            od = od_param, bias = bias_val, af = af) %>%
+  gather(key = "Method", value = "prop_correct", Li:GATK) ->
+  subdat
+
+subdat$Method <- factor(subdat$Method,levels = c("updog", "fitPoly", "GATK", "Li"))
+
+pl <- ggplot(data = subdat, 
+       mapping = aes(x = af, y = prop_correct, color = Method)) +
+  facet_grid(bias ~ od) +
+  geom_boxplot(outlier.size = 0.5) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ggthemes::scale_color_colorblind() +
+  xlab("Allele Frequency") +
+  ylab("Proportion Correct")
+
+pl
+
+pdf(file = "../output/gatk_plots/prop_correct.pdf", 
+    width = 6.5, height = 8, 
+    family = "Times")
+print(pl)
+dev.off()
+         
+```
+
+
+## Correlation
+
+Gains in correlation are much less.
+
+```{r}
+simsout %>%
+  select(ucor_pm, bcor, fpcor_pm, gcor_pm, naive_cor, od_param, bias_val, allele_freq) %>%
+  mutate(af = cut(allele_freq, breaks = seq(0, 1, by = 0.25))) %>%
+  transmute(Li = bcor, updog = ucor_pm, fitPoly = fpcor_pm, 
+            GATK = gcor_pm, Naive = naive_cor,
+            od = od_param, bias = bias_val, af = af) %>%
+  gather(key = "Method", value = "Correlation", Li:Naive) ->
+  subdat
+
+subdat$Method <- factor(subdat$Method,levels = c("updog", "fitPoly", "Naive", "GATK", "Li"))
+
+
+pl <- ggplot(data = subdat, 
+       mapping = aes(x = af, y = Correlation, color = Method)) +
+  facet_grid(bias ~ od, scales = "free_y") +
+  geom_boxplot(outlier.size = 0.5) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ggthemes::scale_color_colorblind() +
+  xlab("Allele Frequency") +
+  ylab("Correlation")
+
+pl
+
+pdf(file = "../output/gatk_plots/corr.pdf", 
+    width = 6.5, height = 8, 
+    family = "Times")
+print(pl)
+dev.off()
+
+```
+
+## Accounting for Uncertainty
+
+```{r}
+simsout %>%
+  select(uepm, fpepm, od_param, bias_val, allele_freq) %>%
+  mutate(af = cut(allele_freq, breaks = seq(0, 1, by = 0.25))) %>%
+  transmute(updog = uepm, fitPoly = fpepm, 
+            od = od_param, bias = bias_val, af = af) %>%
+  gather(key = "Method", value = "epm", updog, fitPoly) ->
+  epmdat
+
+simsout %>%
+  select(uham, fpham, od_param, bias_val, allele_freq) %>%
+  mutate(af = cut(allele_freq, breaks = seq(0, 1, by = 0.25))) %>%
+  transmute(updog = 1 - uham, fitPoly = 1 - fpham, 
+            od = od_param, bias = bias_val, af = af) %>%
+  gather(key = "Method", value = "prop_miss", updog:fitPoly) ->
+  pcdat
+
+pcdat$epm <- epmdat$epm
+
+pcdat %>%
+  mutate(diff = epm - prop_miss) ->
+  pcdat
+
+pcdat$Method <- factor(pcdat$Method, levels = c("updog", "fitPoly"))
+
+pcdat %>% filter(Method == "updog") %>%
+ggplot(mapping = aes(x = prop_miss, y = epm)) +
+  facet_grid(bias ~ od) +
+  geom_point(alpha = 1/10) +
+  geom_abline() +
+    theme_bw() +
+  theme(strip.background = element_rect(fill = "white")) +
+   xlab("Proportion Misclassified") +
+  ylab("Estimated Proportion")
+
+pcdat %>% filter(Method == "fitPoly") %>%
+ggplot(mapping = aes(x = prop_miss, y = epm)) +
+  facet_grid(bias ~ od) +
+  geom_point(alpha = 1/10) +
+  geom_abline() +
+    theme_bw() +
+  theme(strip.background = element_rect(fill = "white")) +
+   xlab("Proportion Misclassified") +
+  ylab("Estimated Proportion")
+
+
+pl <- ggplot(data = pcdat, 
+       mapping = aes(x = af, y = diff, color = Method)) +
+  facet_grid(bias ~ od) +
+  geom_boxplot(outlier.size = 0.5) +
+  geom_hline(yintercept = 0, lty = 2, color = ggthemes::colorblind_pal()(3)[3]) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ggthemes::scale_color_colorblind() +
+  xlab("Allele Frequency") +
+  ylab("Difference")
+pl
+
+
+pdf(file = "../output/gatk_plots/diff.pdf", 
+    width = 6.5, height = 8, 
+    family = "Times")
+print(pl)
+dev.off()
+```
+
