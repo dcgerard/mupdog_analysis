@@ -1,0 +1,84 @@
+---
+title: "How Different Does PP Make the Prior"
+author: "David Gerard"
+date: "May 29, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+We developed a model for preferential pairing. How different does this make the genotype distribution compared to the absence of preferential pairing?
+
+# Analysis
+
+We will assume we are in an S1 population tetraploids. In this case, the only parental genotype that results in a different inheritance distribution is 2. Let's look at how extreme the difference can be.
+```{r, message=FALSE}
+library(updog)
+library(tidyverse)
+library(ggthemes)
+ploidy <- 4
+p1geno <- p2geno <- 2
+blist <- get_bivalent_probs(ploidy = ploidy)
+p1dist <- blist$probmat[blist$lvec == p1geno, , drop = FALSE]
+p2dist <- blist$probmat[blist$lvec == p2geno, , drop = FALSE]
+```
+
+These are the weights needed to get back non-preferential pairing:
+```{r}
+get_hyper_weights(ploidy = ploidy, ell = p1geno)$weightvec
+```
+
+Let's put all of the weight on the first or second second term
+```{r}
+weightvec  <- c(0, 1)
+p1segprob  <- colSums(weightvec * p1dist)
+p2segprob  <- colSums(weightvec * p2dist)
+gene_dist1 <- c(0, 0, 1, 0, 0) ## all weight on first
+gene_dist2 <- c(updog::convolve(x = p1segprob, y = p2segprob))
+f1dist     <- get_q_array(ploidy = ploidy)[p1geno + 1, p2geno + 1, ]
+```
+
+```{r}
+data_frame(None            = f1dist,
+           "All on First"  = gene_dist1,
+           "All on Second" = gene_dist2, 
+           geno            = 0:4) %>%
+  gather(key = "Type", value = "Probability", 1:3) ->
+  smalldat
+smalldat$geno[smalldat$Type == "None"] <-
+  smalldat$geno[smalldat$Type == "None"] - 0.1
+smalldat$geno[smalldat$Type == "All on Second"] <-
+  smalldat$geno[smalldat$Type == "All on Second"] + 0.1
+
+ggplot(data = smalldat,
+  mapping = aes(x     = geno, 
+                xend  = geno, 
+                y     = 0, 
+                yend  = Probability,
+                lty   = Type,
+                color = Type)) +
+  geom_segment(lineend = "round", lwd = 1) +
+  theme_bw() +
+  xlab("Genotype") +
+  ylab("Probability") +
+  ggthemes::scale_color_colorblind()
+```
+
+
+## Aside: comparing convolutions
+
+My convolution is way faster for this scale:
+```{r}
+microbenchmark::microbenchmark(
+stats::convolve(p1segprob, rev(p2segprob), type = "o"),
+updog::convolve(x = p1segprob, y = p2segprob)
+)
+```
+
+
+
+

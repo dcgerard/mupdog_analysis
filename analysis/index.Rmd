@@ -53,7 +53,9 @@ output:
 * [`updog` is faster than `ashr` in terms of weighted problem on small data](cvs_vs_em.html)
 * [`wem` is faster than `mixIP` and `mixEM`](cvx_vs_em2.html)
 * [Hypergeometric distribution is special case of mixtures](hyper_is_mixture.html)
-* [Some plots of the new simulation results](explore_gatk.html)
+* [Some plots of the new simulation results which include GATK](explore_gatk.html)
+* [Show how different preferential pairing can make the genotype distribution](how_diff.html)
+* [Some plots of the new s1pp simulation results](explore_s1pp.html)
 
 # fitPoly
 * [Try `fitPoly` on the Shirasawa data](fit_poly_shir.html). It does just as well in genotyping, but the differences in precision estimates for each individual are very different.
