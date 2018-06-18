@@ -56,6 +56,7 @@ output:
 * [Some plots of the new simulation results which include GATK](explore_gatk.html)
 * [Show how different preferential pairing can make the genotype distribution](how_diff.html)
 * [Some plots of the new s1pp simulation results](explore_s1pp.html)
+* [Histograms of estimated proportion of individuals misgenotyped in the shirasawa dataset](shir_prop_mis.html)
 
 # fitPoly
 * [Try `fitPoly` on the Shirasawa data](fit_poly_shir.html). It does just as well in genotyping, but the differences in precision estimates for each individual are very different.

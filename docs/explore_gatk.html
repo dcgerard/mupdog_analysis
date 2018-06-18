@@ -463,6 +463,197 @@ print(pl)</code></pre>
 <pre><code>## png 
 ##   2</code></pre>
 </div>
+<div id="estimates-of-parameters" class="section level2">
+<h2>Estimates of parameters</h2>
+<pre class="r"><code>simsout %&gt;%
+  transmute(Li          = ballele_freq,
+            updog       = uallele_freq,
+            allele_freq = allele_freq,
+            od          = od_param, 
+            bias        = bias_val) %&gt;%
+  gather(key = &quot;Method&quot;, value = &quot;est_allele_freq&quot;, Li:updog) -&gt;
+  longdat
+  
+
+
+longdat %&gt;% ggplot(mapping = aes(y     = est_allele_freq, 
+                                 x     = allele_freq, 
+                                 color = Method, 
+                                 group = Method)) +
+  facet_grid(bias ~ od) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = &quot;white&quot;)) +
+  xlab(&quot;Allele Frequency&quot;) +
+  ylab(&quot;Estimated Allele Frequency&quot;) +
+  geom_point(size = 0.1) +
+  geom_smooth(color = ggthemes::colorblind_pal()(3)[3]) +
+  geom_abline(intercept = 0, slope = 1, lty = 2, alpha = 1/2) +
+  guides(colour = guide_legend(override.aes = list(size=1.5))) +
+  ggthemes::scale_color_colorblind() -&gt;
+  pl
+
+pl</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;gam&#39;</code></pre>
+<pre><code>## Warning: Removed 11 rows containing non-finite values (stat_smooth).</code></pre>
+<pre><code>## Warning: Removed 11 rows containing missing values (geom_point).</code></pre>
+<p><img src="explore_gatk_files/figure-html/unnamed-chunk-5-1.png" width="624" /></p>
+<pre class="r"><code>pdf(file = &quot;../output/gatk_plots/allele_freq_est.pdf&quot;, 
+    family = &quot;Times&quot;, 
+    height = 8,
+    width = 6.5)
+print(pl)</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;gam&#39;</code></pre>
+<pre><code>## Warning: Removed 11 rows containing non-finite values (stat_smooth).
+
+## Warning: Removed 11 rows containing missing values (geom_point).</code></pre>
+<pre class="r"><code>dev.off()</code></pre>
+<pre><code>## png 
+##   2</code></pre>
+<pre class="r"><code>simsout %&gt;% 
+  select(od_param, 
+         uod_param, 
+         bias_val, 
+         ubias_val, 
+         seq_error, 
+         useq_error, 
+         allele_freq) -&gt;
+  longdat
+
+## very little difference in estimate of OD at different biases and allele_frequencies
+
+pl &lt;- ggplot(data = longdat, 
+             mapping = aes(x = allele_freq, 
+                           y = uod_param)) +
+  facet_grid(bias_val ~ od_param) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = &quot;white&quot;)) +
+  xlab(&quot;Allele Frequency&quot;) +
+  ylab(&quot;Estimated OD Parameter&quot;) +
+  geom_point(size = 0.1) +
+  geom_hline(mapping = aes(yintercept = od_param), lty = 2, color = &quot;red&quot;)
+pdf(file = &quot;../output/gatk_plots/od_v_af.pdf&quot;, 
+    family = &quot;Times&quot;, 
+    colormodel = &quot;cmyk&quot;,
+    height = 8, width = 6.5)
+print(pl)
+dev.off()</code></pre>
+<pre><code>## png 
+##   2</code></pre>
+<pre class="r"><code>pl &lt;- ggplot(data = longdat, 
+             mapping = aes(x = as.factor(bias_val),
+                           y = uod_param)) +
+  facet_grid(.~od_param) +
+  geom_boxplot() +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = &quot;white&quot;)) +
+  xlab(&quot;Bias Parameter&quot;) +
+  ylab(&quot;Estimated OD Parameter&quot;) +
+  geom_hline(mapping = aes(yintercept = od_param), lty = 2, color = &quot;red&quot;)
+pdf(file = &quot;../output/gatk_plots/od_v_bias.pdf&quot;, 
+    family = &quot;Times&quot;, 
+    colormodel = &quot;cmyk&quot;,
+    height = 3,
+    width = 6.5)
+print(pl)
+dev.off()</code></pre>
+<pre><code>## png 
+##   2</code></pre>
+<pre class="r"><code>pl_od &lt;- ggplot(data = longdat, 
+                mapping = aes(x = as.factor(od_param), 
+                              y = uod_param)) +
+  geom_boxplot(outlier.size = 0.1) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = &quot;white&quot;),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  xlab(expression(tau)) +
+  ylab(expression(hat(tau))) +
+  geom_hline(yintercept = 0, lty = 2, alpha = 1 / 2, color = &quot;red&quot;) +
+  geom_hline(yintercept = 0.01, lty = 2, alpha = 1 / 2, color = &quot;red&quot;) +
+  geom_hline(yintercept = 0.05, lty = 2, alpha = 1 / 2, color = &quot;red&quot;)
+
+
+
+## Bias estimates
+pl &lt;- ggplot(data = longdat, 
+             mapping = aes(x = allele_freq,
+                           y = log2(ubias_val))) +
+  facet_grid(bias_val ~ od_param) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = &quot;white&quot;)) +
+  xlab(&quot;Allele Frequency&quot;) +
+  ylab(&quot;Log2 Estimated Bias Parameter&quot;) +
+  geom_point(size = 0.1) +
+  geom_hline(mapping = aes(yintercept = log2(bias_val)), lty = 2, color = &quot;red&quot;)
+pdf(file = &quot;../output/gatk_plots/bias_v_af.pdf&quot;, 
+    family = &quot;Times&quot;, 
+    colormodel = &quot;cmyk&quot;, 
+    height = 8, 
+    width = 6.5)
+print(pl)
+dev.off()</code></pre>
+<pre><code>## png 
+##   2</code></pre>
+<pre class="r"><code>pl_bias &lt;- ggplot(data = longdat, 
+                  mapping = aes(x = as.factor(od_param), 
+                                y = log2(ubias_val))) +
+  facet_grid(.~bias_val) +
+  geom_boxplot(outlier.size = 0.1) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = &quot;white&quot;),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  xlab(expression(tau)) +
+  ylab(expression(log[2](hat(h)))) +
+  geom_hline(mapping = aes(yintercept = log2(bias_val)), lty = 2, color = &quot;red&quot;)
+
+
+## Sequencing error rate
+pl &lt;- ggplot(data = longdat, 
+             mapping = aes(x = allele_freq, 
+                           y = useq_error)) +
+  facet_grid(bias_val ~ od_param) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = &quot;white&quot;)) +
+  xlab(&quot;Allele Frequency&quot;) +
+  ylab(&quot;Estimated Sequencing Error Rate&quot;) +
+  geom_point(size = 0.1) +
+  geom_hline(mapping = aes(yintercept = seq_error), lty = 2, color = &quot;red&quot;)
+pdf(file = &quot;../output/gatk_plots/seq_v_af.pdf&quot;, 
+    family = &quot;Times&quot;,
+    colormodel = &quot;cmyk&quot;, 
+    height = 8, 
+    width = 6.5)
+print(pl)
+dev.off()</code></pre>
+<pre><code>## png 
+##   2</code></pre>
+<pre class="r"><code>pl_seq &lt;- ggplot(data = longdat, 
+                 mapping = aes(x = as.factor(od_param), 
+                               y = useq_error)) +
+  geom_boxplot(outlier.size = 0.1) +
+  geom_hline(yintercept = 0.005, col = &quot;red&quot;, lty = 2) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  xlab(expression(tau)) +
+  ylab(expression(hat(epsilon)))
+
+
+## Plots for main part of paper.
+library(gridExtra)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;gridExtra&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     combine</code></pre>
+<pre class="r"><code>pdf(file = &quot;../output/gatk_plots/param_ests.pdf&quot;,
+    family = &quot;Times&quot;, 
+    colormodel = &quot;cmyk&quot;,
+    height = 2.3, 
+    width = 6.5)
+grid.arrange(pl_od, pl_bias, pl_seq, ncol = 3)
+dev.off()</code></pre>
+<pre><code>## png 
+##   2</code></pre>
+</div>
 </div>
 
 <hr>

@@ -1,0 +1,47 @@
+---
+title: "Shirasawa Prop Miss"
+author: "David Gerard"
+date: "June 18, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I plot histograms of the estimated proportion of individuals mis-genotyped.
+
+# Analysis
+
+```{r}
+suppressMessages(library(updog))
+suppressMessages(library(tidyverse))
+nsnps <- 1000
+
+fp_prop_mis <- rep(NA, length = nsnps)
+u_prop_mis  <- rep(NA, length = nsnps)
+for (index in seq_len(nsnps)) {
+  fout <- readRDS(paste0("../../../reproduce_genotyping/Output/fp_fits/fpout", index, ".RDS"))
+  uout <- readRDS(paste0("../../../reproduce_genotyping/Output/updog_fits/uout", index, ".RDS"))
+  if (!is.null(fout$prop_miss)) {
+    fp_prop_mis[index] <- fout$prop_miss
+  }
+  u_prop_mis[index] <- uout$prop_mis
+}
+```
+
+```{r, warning=FALSE, message=FALSE}
+qplot(u_prop_mis, bins = 40, main = "Updog prop_mis")
+qplot(fp_prop_mis, bins = 40, main = "fitPoly prop_mis")
+```
+
+```{r}
+shdf <- readRDS("../../../reproduce_genotyping/Output/shirasawa_snps/shir_features.RDS")
+
+qplot(shdf$od, bins = 40, main = "OD")
+qplot(shdf$bias, bins = 40, main = "BIAS")
+qplot(shdf$seq, bins = 40, main = "SEQ")
+```
+
