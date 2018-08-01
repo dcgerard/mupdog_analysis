@@ -1,0 +1,194 @@
+---
+title: "Prior Sims 30 Just Extremes"
+author: "David Gerard"
+date: "June 19, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+I plot just the extremes of the prior simulations.
+
+# Analysis
+
+```{r, message=FALSE}
+library(tidyverse)
+library(ggthemes)
+ploidy <- 6
+readRDS("../output/prior_sims_30/sims_out.RDS") %>%
+  as_data_frame() %>%
+  mutate(geno_dist = plyr::revalue(geno_dist, c(uniform="unif"))) ->
+  simsdat
+
+simsdat %>% 
+  select(seed:ploidy, contains("pc")) %>%
+  gather(key = "prior", value = "pc", contains("pc")) %>%
+  mutate(prior = stringr::str_replace(prior, "pc_", "")) %>%
+  filter(od == 0.01, bias == 0.5, geno_dist != "unif") %>%
+  select(geno_dist, prior, pc) %>%
+  mutate(correct = geno_dist == prior) ->
+  pcdat
+
+pcdat$prior[pcdat$prior == "hw"] <- "HW"
+pcdat$prior[pcdat$prior == "bb"] <- "BB"
+pcdat$prior[pcdat$prior == "norm"] <- "Normal"
+pcdat$prior[pcdat$prior == "ash"] <- "Unimodal"
+pcdat$prior[pcdat$prior == "f1"] <- "F1"
+pcdat$prior[pcdat$prior == "flex"] <- "Generic"
+pcdat$prior[pcdat$prior == "uniform"] <- "Uniform"
+
+pcdat$geno_dist <- as.character(pcdat$geno_dist)
+pcdat$geno_dist[pcdat$geno_dist == "hw"] <- "HW"
+pcdat$geno_dist[pcdat$geno_dist == "bb"] <- "BB"
+pcdat$geno_dist[pcdat$geno_dist == "norm"] <- "Normal"
+pcdat$geno_dist[pcdat$geno_dist == "ash"] <- "Unimodal"
+pcdat$geno_dist[pcdat$geno_dist == "f1"] <- "F1"
+pcdat$geno_dist[pcdat$geno_dist == "flex"] <- "Generic"
+pcdat$geno_dist[pcdat$geno_dist == "uniform"] <- "Uniform"
+
+flevels <- c("Uniform", "F1", "HW", "BB", "Normal", "Unimodal", "Generic") 
+pcdat$prior <- factor(pcdat$prior, levels = flevels)
+pcdat$geno_dist <- factor(pcdat$geno_dist, levels = flevels)
+```
+
+```{r}
+pcdat %>%
+  ggplot(mapping = aes(x = prior, y = pc, color = correct)) +
+  geom_boxplot(outlier.size = 0.7, lwd = 0.5) +
+  facet_wrap(~geno_dist) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ylab("Proportion Genotyped Correctly") +
+  xlab("Assumed Prior") +
+  ggthemes::scale_color_colorblind() +
+  guides(color=FALSE) +
+  ylim(0, 1) +
+  ggtitle("h = 0.5")  ->
+  pl
+
+pdf(file = "../output/prior_sims_30/priors/pc_odf1_bias5.pdf",
+    family = "Times", height = 3.3, width = 4.3)
+print(pl)
+dev.off()
+
+```
+
+
+# Same thing but with no bias
+
+```{r}
+simsdat %>% 
+  select(seed:ploidy, contains("pc")) %>%
+  gather(key = "prior", value = "pc", contains("pc")) %>%
+  mutate(prior = stringr::str_replace(prior, "pc_", "")) %>%
+  filter(od == 0.01, bias == 1, geno_dist != "unif") %>%
+  select(geno_dist, prior, pc) %>%
+  mutate(correct = geno_dist == prior) ->
+  pcdat
+
+pcdat$prior[pcdat$prior == "hw"] <- "HW"
+pcdat$prior[pcdat$prior == "bb"] <- "BB"
+pcdat$prior[pcdat$prior == "norm"] <- "Normal"
+pcdat$prior[pcdat$prior == "ash"] <- "Unimodal"
+pcdat$prior[pcdat$prior == "f1"] <- "F1"
+pcdat$prior[pcdat$prior == "flex"] <- "Generic"
+pcdat$prior[pcdat$prior == "uniform"] <- "Uniform"
+
+pcdat$geno_dist <- as.character(pcdat$geno_dist)
+pcdat$geno_dist[pcdat$geno_dist == "hw"] <- "HW"
+pcdat$geno_dist[pcdat$geno_dist == "bb"] <- "BB"
+pcdat$geno_dist[pcdat$geno_dist == "norm"] <- "Normal"
+pcdat$geno_dist[pcdat$geno_dist == "ash"] <- "Unimodal"
+pcdat$geno_dist[pcdat$geno_dist == "f1"] <- "F1"
+pcdat$geno_dist[pcdat$geno_dist == "flex"] <- "Generic"
+pcdat$geno_dist[pcdat$geno_dist == "uniform"] <- "Uniform"
+
+flevels <- c("Uniform", "F1", "HW", "BB", "Normal", "Unimodal", "Generic") 
+pcdat$prior <- factor(pcdat$prior, levels = flevels)
+pcdat$geno_dist <- factor(pcdat$geno_dist, levels = flevels)
+```
+
+```{r}
+pcdat %>%
+  ggplot(mapping = aes(x = prior, y = pc, color = correct)) +
+  geom_boxplot(outlier.size = 0.7, lwd = 0.5) +
+  facet_wrap(~geno_dist) +
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"),
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+  ylab("Proportion Genotyped Correctly") +
+  xlab("Assumed Prior") +
+  ggthemes::scale_color_colorblind() +
+  guides(color=FALSE) +
+  ylim(0, 1) +
+  ggtitle("h = 1") ->
+  pl
+
+pdf(file = "../output/prior_sims_30/priors/pc_odf1_bias1.pdf",
+    family = "Times", height = 3.3, width = 4.3)
+print(pl)
+dev.off()
+
+```
+
+# Plot the True Prior Distributions
+
+```{r}
+pilist <- readRDS("../output/prior_sims_30/pilist.RDS")
+names(pilist)[names(pilist) == "uniform"] <- "unif"
+dist_vec <- names(pilist)
+
+for (index in 1:length(pilist)) {
+  pidat <- data_frame(x = 0:ploidy, xend = 0:ploidy, yend = pilist[[index]])
+  pidat$y <- 0
+  pl <- ggplot(data = pidat, mapping = aes(x = x, xend = xend, y = y, yend = yend)) +
+    geom_segment(lineend = "round", lwd = 2) +
+    xlab("Genotype") +
+    ylab("Frequency") +
+    ylim(0, 0.5) +
+    theme_bw()
+  pdf(file = paste0("../output/prior_sims_30/priors/prior_", dist_vec[index], ".pdf"),
+      family = "Times", height = 3, width = 4.3)
+  print(pl)
+  dev.off()
+  
+  pidat$prior <- dist_vec[index]
+  if (index == 1) {
+    fullpidat <- pidat
+  } else {
+    fullpidat <- bind_rows(fullpidat, pidat)
+  }
+}
+
+fullpidat <- filter(fullpidat, prior != "unif")
+
+fullpidat$prior[fullpidat$prior == "hw"] <- "HW"
+fullpidat$prior[fullpidat$prior == "bb"] <- "BB"
+fullpidat$prior[fullpidat$prior == "norm"] <- "Normal"
+fullpidat$prior[fullpidat$prior == "ash"] <- "Unimodal"
+fullpidat$prior[fullpidat$prior == "f1"] <- "F1"
+fullpidat$prior[fullpidat$prior == "flex"] <- "Generic"
+fullpidat$prior[fullpidat$prior == "uniform"] <- "Uniform"
+fullpidat$prior <- factor(fullpidat$prior, levels = flevels)
+```
+
+```{r}
+pl <- ggplot(data = fullpidat, mapping = aes(x = x, xend = xend, y = y, yend = yend)) +
+  geom_segment(lineend = "round", lwd = 1) +
+  xlab("Genotype") +
+  ylab("Probability") +
+  theme_bw() +
+  facet_wrap(~prior) +
+  theme(strip.background = element_rect(fill = "white")) +
+  scale_x_continuous(breaks = 0:ploidy)
+pdf(file = "../output/prior_sims_30/priors/all_priors.pdf",
+    family = "Times", height = 3, width = 4.3)
+print(pl)
+dev.off()
+```
+

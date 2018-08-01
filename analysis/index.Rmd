@@ -64,3 +64,6 @@ output:
 * [Example Shirasawa SNP where `updog` appears to perform much better than `fitPoly`](fitPoly_on_shir.html)
 * [`updog` always does better using correlation as the metric](fitPoly_cor.html)
 
+# `polyRAD`
+* [Try out `polyRAD` for the first time](polyrad_try1.html). It does not account for bias or OD, so the usual problems result.
+

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="David Gerard" />
+
+<meta name="date" content="2018-07-31" />
+
+<title>Try polyRAD on Shir Data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">mupdog</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/dcgerard/mupdog">
+    <span class="fa fa-github"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Try polyRAD on Shir Data</h1>
+<h4 class="author"><em>David Gerard</em></h4>
+<h4 class="date"><em>July 31, 2018</em></h4>
+
+</div>
+
+
+<div id="abstract" class="section level1">
+<h1>Abstract</h1>
+<p>Look at a few SNPs and see how well polyRAD does on them.</p>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<pre class="r"><code>library(updog)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;updog&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:stats&#39;:
+## 
+##     convolve</code></pre>
+<pre class="r"><code>library(polyRAD)
+library(tidyverse)</code></pre>
+<pre><code>## -- Attaching packages ------------ tidyverse 1.2.1 --</code></pre>
+<pre><code>## v ggplot2 3.0.0     v purrr   0.2.5
+## v tibble  1.4.2     v dplyr   0.7.6
+## v tidyr   0.8.1     v stringr 1.3.1
+## v readr   1.1.1     v forcats 0.3.0</code></pre>
+<pre><code>## -- Conflicts --------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>shirdf &lt;- readRDS(&quot;../data/shir_features.RDS&quot;)
+
+refmat &lt;- read.csv(&quot;../../../reproduce_genotyping/Output/shirasawa_snps/example_refcounts.csv&quot;)
+sizemat &lt;- read.csv(&quot;../../../reproduce_genotyping/Output/shirasawa_snps/example_readcounts.csv&quot;)
+ploidy &lt;- 6</code></pre>
+<p>Polyrad does not account for allele bias.</p>
+<pre class="r"><code>index &lt;- 3
+refvec &lt;- refmat[, index]
+sizevec &lt;- sizemat[, index]
+whichNA &lt;- is.na(refvec) | is.na(sizevec)
+refvec &lt;- refvec[!whichNA]
+sizevec &lt;- sizevec[!whichNA]
+
+plot_geno(refvec = refvec, sizevec = sizevec, ploidy = ploidy)</code></pre>
+<p><img src="polyrad_try1_files/figure-html/bias_snp-1.png" width="672" /></p>
+<pre class="r"><code>alleleDepth &lt;- cbind(refvec, sizevec - refvec)
+row.names(alleleDepth) &lt;- 1:nrow(alleleDepth)
+alleles2loc &lt;- as.vector(c(1, 1), mode = &quot;integer&quot;)
+locTable &lt;- data.frame(row.names = 1)
+possiblePloidies = list(6)
+alleleNucleotides &lt;- c(&quot;A&quot;, &quot;C&quot;)
+RADdata(alleleDepth = alleleDepth, 
+        alleles2loc = alleles2loc, 
+        locTable = locTable,
+        possiblePloidies = possiblePloidies, 
+        contamRate = 0.001,
+        alleleNucleotides = alleleNucleotides) -&gt;
+  rad_dat
+
+IterateHWE(object = rad_dat) -&gt;
+  rad_out</code></pre>
+<pre><code>## Starting iteration 1</code></pre>
+<pre><code>## Mean difference in allele frequencies of 0.0215783683833828</code></pre>
+<pre><code>## Starting iteration 2</code></pre>
+<pre><code>## Mean difference in allele frequencies of 0.000449840540924673</code></pre>
+<pre><code>## Starting iteration 3</code></pre>
+<pre><code>## Mean difference in allele frequencies of 8.8267230094613e-06</code></pre>
+<pre class="r"><code>apply(rad_out$posteriorProb[[1]][, , 1], 2, which.max) - 1 -&gt;
+  dosage_est
+
+plot_geno(refvec = refvec, sizevec = sizevec, ploidy = ploidy, geno = dosage_est)</code></pre>
+<p><img src="polyrad_try1_files/figure-html/bias_snp-2.png" width="672" /></p>
+<p>Now for an overdispersed SNP. I run updog using the <code>norm</code> option since I’m forced to use the HWE option in polyRAD.</p>
+<pre class="r"><code>index &lt;- 2
+refvec &lt;- refmat[, index]
+sizevec &lt;- sizemat[, index]
+whichNA &lt;- is.na(refvec) | is.na(sizevec)
+refvec &lt;- refvec[!whichNA]
+sizevec &lt;- sizevec[!whichNA]
+
+plot_geno(refvec = refvec, sizevec = sizevec, ploidy = ploidy)</code></pre>
+<p><img src="polyrad_try1_files/figure-html/bias%20snp-1.png" width="672" /></p>
+<pre class="r"><code>alleleDepth &lt;- cbind(refvec, sizevec - refvec)
+row.names(alleleDepth) &lt;- 1:nrow(alleleDepth)
+alleles2loc &lt;- as.vector(c(1, 1), mode = &quot;integer&quot;)
+locTable &lt;- data.frame(row.names = 1)
+possiblePloidies = list(6)
+alleleNucleotides &lt;- c(&quot;A&quot;, &quot;C&quot;)
+RADdata(alleleDepth = alleleDepth, 
+        alleles2loc = alleles2loc, 
+        locTable = locTable,
+        possiblePloidies = possiblePloidies, 
+        contamRate = 0.001,
+        alleleNucleotides = alleleNucleotides) -&gt;
+  rad_dat
+
+IterateHWE(object = rad_dat) -&gt;
+  rad_out</code></pre>
+<pre><code>## Starting iteration 1</code></pre>
+<pre><code>## Mean difference in allele frequencies of 0.0053859184541234</code></pre>
+<pre><code>## Starting iteration 2</code></pre>
+<pre><code>## Mean difference in allele frequencies of 8.02239825142409e-05</code></pre>
+<pre><code>## Starting iteration 3</code></pre>
+<pre><code>## Mean difference in allele frequencies of 1.1824355992951e-06</code></pre>
+<pre class="r"><code>apply(rad_out$posteriorProb[[1]][, , 1], 2, which.max) - 1 -&gt;
+  dosage_est
+
+plot_geno(refvec = refvec, sizevec = sizevec, ploidy = ploidy, geno = dosage_est)</code></pre>
+<p><img src="polyrad_try1_files/figure-html/bias%20snp-2.png" width="672" /></p>
+<pre class="r"><code>rad_maxpostprob &lt;- apply(rad_out$posteriorProb[[1]][, , 1], 2, max)
+
+uout &lt;- flexdog(refvec = refvec, sizevec = sizevec, ploidy = 6)</code></pre>
+<pre><code>##          Fit: 1 of 5 
+## Initial Bias: 0.3679 
+## Log-Likelihood: -547 
+## Keeping new fit.
+## 
+##          Fit: 2 of 5 
+## Initial Bias: 0.6065 
+## Log-Likelihood: -547 
+## Keeping old fit.
+## 
+##          Fit: 3 of 5 
+## Initial Bias: 1 
+## Log-Likelihood: -547 
+## Keeping old fit.
+## 
+##          Fit: 4 of 5 
+## Initial Bias: 1.649 
+## Log-Likelihood: -547 
+## Keeping new fit.
+## 
+##          Fit: 5 of 5 
+## Initial Bias: 2.718 
+## Log-Likelihood: -552.5 
+## Keeping old fit.
+## 
+## Done!</code></pre>
+<pre class="r"><code>plot(uout)</code></pre>
+<p><img src="polyrad_try1_files/figure-html/bias%20snp-3.png" width="672" /></p>
+<p>Updog is always more conservative. There are some individuals that polyRAD is VERY sure of and updog is very unsure of.</p>
+<pre class="r"><code>qplot(uout$maxpostprob, 
+      rad_maxpostprob,
+      xlab = &quot;updog&quot;,
+      ylab = &quot;polyRAD&quot;,
+      main = &quot;Est Prob Correct&quot;) +
+  geom_abline()</code></pre>
+<p><img src="polyrad_try1_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>As expected the points of disagreement are on the boundaries between dosages.</p>
+<pre class="r"><code>weird_points &lt;- 1*(uout$maxpostprob &lt; 0.9 &amp; rad_maxpostprob &gt; 0.9 )
+plot_geno(refvec = refvec, sizevec = sizevec, geno = weird_points, ploidy = 6)</code></pre>
+<p><img src="polyrad_try1_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>Updog’s posterior means are a LOT more continuous.</p>
+<pre class="r"><code>colSums(rad_out$posteriorProb[[1]][ , ,1] * 0:6) -&gt;
+  rad_pm
+qplot(uout$postmean, rad_pm, xlab = &quot;updog&quot;, ylab = &quot;polyRAD&quot;)</code></pre>
+<p><img src="polyrad_try1_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.5.1 (2018-07-02)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 17134)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] forcats_0.3.0   stringr_1.3.1   dplyr_0.7.6     purrr_0.2.5    
+##  [5] readr_1.1.1     tidyr_0.8.1     tibble_1.4.2    ggplot2_3.0.0  
+##  [9] tidyverse_1.2.1 polyRAD_0.5-0   updog_1.0.1    
+## 
+## loaded via a namespace (and not attached):
+##  [1] tidyselect_0.2.4          ggthemes_4.0.0           
+##  [3] haven_1.1.2               lattice_0.20-35          
+##  [5] colorspace_1.3-2          htmltools_0.3.6          
+##  [7] yaml_2.2.0                rlang_0.2.1              
+##  [9] pillar_1.3.0              withr_2.1.2              
+## [11] glue_1.3.0                readxl_1.1.0             
+## [13] modelr_0.1.2              bindrcpp_0.2.2           
+## [15] foreach_1.4.4             bindr_0.1.1              
+## [17] plyr_1.8.4                cellranger_1.1.0         
+## [19] munsell_0.5.0             gtable_0.2.0             
+## [21] rvest_0.3.2               codetools_0.2-15         
+## [23] evaluate_0.11             labeling_0.3             
+## [25] knitr_1.20                RcppArmadillo_0.8.600.0.0
+## [27] doParallel_1.0.11         parallel_3.5.1           
+## [29] broom_0.5.0               Rcpp_0.12.18             
+## [31] scales_0.5.0              backports_1.1.2          
+## [33] jsonlite_1.5              fastmatch_1.1-0          
+## [35] hms_0.4.2                 digest_0.6.15            
+## [37] stringi_1.2.4             grid_3.5.1               
+## [39] rprojroot_1.3-2           cli_1.0.0                
+## [41] tools_3.5.1               magrittr_1.5             
+## [43] lazyeval_0.2.1            crayon_1.3.4             
+## [45] pkgconfig_2.0.1           xml2_1.2.0               
+## [47] lubridate_1.7.4           rstudioapi_0.7           
+## [49] assertthat_0.2.0          rmarkdown_1.10           
+## [51] httr_1.3.1                iterators_1.0.10         
+## [53] R6_2.2.2                  nlme_3.1-137             
+## [55] compiler_3.5.1</code></pre>
+</div>
+
+<hr>
+<p>
+    This <a href="http://rmarkdown.rstudio.com">R Markdown</a> site was created with <a href="https://github.com/jdblischak/workflowr">workflowr</a>
+</p>
+<hr>
+
+<!-- To enable disqus, uncomment the section below and provide your disqus_shortname -->
+
+<!-- disqus
+  <div id="disqus_thread"></div>
+    <script type="text/javascript">
+        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+        var disqus_shortname = 'rmarkdown'; // required: replace example with your forum shortname
+
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+-->
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

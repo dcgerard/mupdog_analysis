@@ -1,0 +1,132 @@
+---
+title: "Try polyRAD on Shir Data"
+author: "David Gerard"
+date: "July 31, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abstract
+
+Look at a few SNPs and see how well polyRAD does on them.
+
+# Analysis
+
+```{r}
+library(updog)
+library(polyRAD)
+library(tidyverse)
+shirdf <- readRDS("../data/shir_features.RDS")
+
+refmat <- read.csv("../../../reproduce_genotyping/Output/shirasawa_snps/example_refcounts.csv")
+sizemat <- read.csv("../../../reproduce_genotyping/Output/shirasawa_snps/example_readcounts.csv")
+ploidy <- 6
+```
+
+
+Polyrad does not account for allele bias.
+
+```{r, bias_snp}
+index <- 3
+refvec <- refmat[, index]
+sizevec <- sizemat[, index]
+whichNA <- is.na(refvec) | is.na(sizevec)
+refvec <- refvec[!whichNA]
+sizevec <- sizevec[!whichNA]
+
+plot_geno(refvec = refvec, sizevec = sizevec, ploidy = ploidy)
+
+alleleDepth <- cbind(refvec, sizevec - refvec)
+row.names(alleleDepth) <- 1:nrow(alleleDepth)
+alleles2loc <- as.vector(c(1, 1), mode = "integer")
+locTable <- data.frame(row.names = 1)
+possiblePloidies = list(6)
+alleleNucleotides <- c("A", "C")
+RADdata(alleleDepth = alleleDepth, 
+        alleles2loc = alleles2loc, 
+        locTable = locTable,
+        possiblePloidies = possiblePloidies, 
+        contamRate = 0.001,
+        alleleNucleotides = alleleNucleotides) ->
+  rad_dat
+
+IterateHWE(object = rad_dat) ->
+  rad_out
+
+apply(rad_out$posteriorProb[[1]][, , 1], 2, which.max) - 1 ->
+  dosage_est
+
+plot_geno(refvec = refvec, sizevec = sizevec, ploidy = ploidy, geno = dosage_est)
+```
+
+Now for an overdispersed SNP. I run updog using the `norm` option since I'm forced to use the HWE option in polyRAD.
+
+```{r, bias snp}
+index <- 2
+refvec <- refmat[, index]
+sizevec <- sizemat[, index]
+whichNA <- is.na(refvec) | is.na(sizevec)
+refvec <- refvec[!whichNA]
+sizevec <- sizevec[!whichNA]
+
+plot_geno(refvec = refvec, sizevec = sizevec, ploidy = ploidy)
+
+alleleDepth <- cbind(refvec, sizevec - refvec)
+row.names(alleleDepth) <- 1:nrow(alleleDepth)
+alleles2loc <- as.vector(c(1, 1), mode = "integer")
+locTable <- data.frame(row.names = 1)
+possiblePloidies = list(6)
+alleleNucleotides <- c("A", "C")
+RADdata(alleleDepth = alleleDepth, 
+        alleles2loc = alleles2loc, 
+        locTable = locTable,
+        possiblePloidies = possiblePloidies, 
+        contamRate = 0.001,
+        alleleNucleotides = alleleNucleotides) ->
+  rad_dat
+
+IterateHWE(object = rad_dat) ->
+  rad_out
+
+apply(rad_out$posteriorProb[[1]][, , 1], 2, which.max) - 1 ->
+  dosage_est
+
+plot_geno(refvec = refvec, sizevec = sizevec, ploidy = ploidy, geno = dosage_est)
+
+rad_maxpostprob <- apply(rad_out$posteriorProb[[1]][, , 1], 2, max)
+
+uout <- flexdog(refvec = refvec, sizevec = sizevec, ploidy = 6)
+plot(uout)
+```
+
+Updog is always more conservative. There are some individuals that polyRAD is VERY sure of and updog is very unsure of.
+```{r}
+qplot(uout$maxpostprob, 
+      rad_maxpostprob,
+      xlab = "updog",
+      ylab = "polyRAD",
+      main = "Est Prob Correct") +
+  geom_abline()
+```
+
+As expected the points of disagreement are on the boundaries between dosages.
+```{r}
+weird_points <- 1*(uout$maxpostprob < 0.9 & rad_maxpostprob > 0.9 )
+plot_geno(refvec = refvec, sizevec = sizevec, geno = weird_points, ploidy = 6)
+```
+
+Updog's posterior means are a LOT more continuous.
+```{r}
+colSums(rad_out$posteriorProb[[1]][ , ,1] * 0:6) ->
+  rad_pm
+qplot(uout$postmean, rad_pm, xlab = "updog", ylab = "polyRAD")
+```
+
+
+```{r}
+sessionInfo()
+```
+
